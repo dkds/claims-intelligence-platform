@@ -1,0 +1,38 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+.mvn/repository/
+
+# Go
+services/fraud-detection/fraud-detection
+services/fraud-detection/*.exe
+
+# Node / npm / pnpm
+node_modules/
+dist/
+.env.local
+.env.*.local
+.pnpm-store
+
+# Vite / React
+web/clinic-workbench/dist/
+
+# Claude Code
+.claude/settings.local.json
+
+# IDEs
+.idea/
+*.iml
+.vscode/settings.json
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
