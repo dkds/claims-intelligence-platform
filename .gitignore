@@ -21,6 +21,7 @@ web/clinic-workbench/dist/
 
 # Claude Code
 .claude/settings.local.json
+.claude/output.md
 
 # IDEs
 .idea/

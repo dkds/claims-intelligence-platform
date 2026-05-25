@@ -4,6 +4,7 @@ services:
     command: sleep infinity
     volumes:
       - ..:/home/vscode/workspaces/claims-intelligence-platform:cached
+      - claude_data:/home/vscode/.claude
     networks: [cip]
     depends_on:
       - postgres
@@ -18,7 +19,7 @@ services:
       POSTGRES_PASSWORD: cip
     volumes:
       - ./init-postgres:/docker-entrypoint-initdb.d:ro
-      - pgdata:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks: [cip]
@@ -51,7 +52,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - mongodata:/data/db
+      - mongo_data:/data/db
     networks: [cip]
 
   redis:
@@ -61,8 +62,9 @@ services:
     networks: [cip]
 
 volumes:
-  pgdata:
-  mongodata:
+  pg_data:
+  mongo_data:
+  claude_data:
 
 networks:
   cip:
