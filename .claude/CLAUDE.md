@@ -81,7 +81,7 @@ Building **Tier 1** in phases; keep something runnable at each step:
 - Go: `cd services/fraud-detection && go run ./...`; tests: `go test ./...`.
 - Node service: `cd services/<name> && pnpm run start:dev`; tests: `pnpm test`.
 - Frontend: `cd web/clinic-workbench && pnpm run dev`.
-- Infra runs with the dev container; the Redpanda console is at `localhost:8085`.
+- Infra: `docker compose up` (file is `compose.yml`); the Redpanda console is at `localhost:8085`.
 
 ## Working conventions
 

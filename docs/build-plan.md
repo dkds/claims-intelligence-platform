@@ -35,7 +35,7 @@ A **monorepo** is recommended for a solo build — one clone, one `docker-compos
 
 ```
 claims-intelligence-platform/
-  docker-compose.yml
+  compose.yml
   contracts/                 # shared event schemas (JSON first, Avro later)
   services/
     enrollment-policy/       # Java / Spring Boot
@@ -56,7 +56,7 @@ claims-intelligence-platform/
 
 ## 4. Local infrastructure
 
-Use **docker-compose** for development, not Kubernetes — Kubernetes (Kind/Minikube) is a Tier 3 concern once the system runs. Compose brings up:
+Use **Docker Compose** for development, not Kubernetes — Kubernetes (Kind/Minikube) is a Tier 3 concern once the system runs. Compose brings up:
 
 - **Kafka** — a single broker. Consider **Redpanda**, a Kafka-compatible single-binary broker with a built-in console; it removes most of the local Kafka setup friction and is ideal for a learning build.
 - **PostgreSQL** — one database (or one schema) per Java service; never shared.
@@ -82,7 +82,7 @@ Use **docker-compose** for development, not Kubernetes — Kubernetes (Kind/Mini
 ## 6. Phased build sequence
 
 ### Phase 0 — Foundations
-- **Build:** the monorepo skeleton; `docker-compose` with Kafka/Redpanda, Postgres, Mongo, Redis; a `/health` endpoint per service stub; a basic CI workflow (build + test).
+- **Build:** the monorepo skeleton; `compose.yml` with Kafka/Redpanda, Postgres, Mongo, Redis; a `/health` endpoint per service stub; a basic CI workflow (build + test).
 - **Runnable:** `docker compose up` brings up infra; each stub answers on `/health`.
 
 ### Phase 1 — Walking skeleton: Enrollment & Policy

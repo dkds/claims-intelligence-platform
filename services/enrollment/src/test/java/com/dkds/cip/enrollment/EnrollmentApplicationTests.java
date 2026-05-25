@@ -1,13 +1,11 @@
 package com.dkds.cip.enrollment;
 
+import com.dkds.cip.enrollment.common.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class EnrollmentApplicationTests {
+class EnrollmentApplicationTests extends AbstractIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+    }
 }
