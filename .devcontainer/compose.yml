@@ -6,6 +6,7 @@ services:
       - ..:/home/vscode/workspaces/claims-intelligence-platform:cached
       - ./claude-config/data:/home/vscode/.claude
       - ./claude-config/.claude.json:/home/vscode/.claude.json
+      - ./intellij:/home/vscode/.cache/JetBrains
     networks: [cip]
     depends_on:
       - postgres

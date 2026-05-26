@@ -25,6 +25,7 @@ web/clinic-workbench/dist/
 claude-config/
 
 # IDEs
+intellij
 .idea/
 *.iml
 .vscode/settings.json
