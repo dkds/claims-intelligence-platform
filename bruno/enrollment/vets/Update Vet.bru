@@ -1,0 +1,18 @@
+meta {
+  name: Update Vet
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/vets/{{vetId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "jane.updated@vet.com",
+    "licenseNumber": "LIC-001-R"
+  }
+}

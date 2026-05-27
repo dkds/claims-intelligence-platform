@@ -1,0 +1,20 @@
+meta {
+  name: Register Vet
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/clinics/{{clinicId}}/vets
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane.doe@vet.com",
+    "licenseNumber": "LIC-001"
+  }
+}

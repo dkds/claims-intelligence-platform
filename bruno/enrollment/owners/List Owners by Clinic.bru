@@ -1,0 +1,11 @@
+meta {
+  name: List Owners by Clinic
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/clinics/{{clinicId}}/owners
+  body: none
+  auth: none
+}

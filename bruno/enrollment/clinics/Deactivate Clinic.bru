@@ -1,0 +1,11 @@
+meta {
+  name: Deactivate Clinic
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/clinics/{{clinicId}}
+  body: none
+  auth: none
+}

@@ -1,0 +1,11 @@
+meta {
+  name: List Pets by Clinic
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/clinics/{{clinicId}}/pets
+  body: none
+  auth: none
+}

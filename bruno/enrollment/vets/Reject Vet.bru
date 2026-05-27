@@ -1,0 +1,17 @@
+meta {
+  name: Reject Vet
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/vets/{{vetId}}/reject
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "reason": "License could not be verified"
+  }
+}

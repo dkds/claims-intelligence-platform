@@ -1,0 +1,18 @@
+meta {
+  name: Update Clinic
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/clinics/{{clinicId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Paws Clinic (Updated)",
+    "contactEmail": "updated@paws.com"
+  }
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Enrol Pet
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/clinics/{{clinicId}}/pets
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "ownerId": "{{ownerId}}",
+    "name": "Buddy",
+    "species": "Dog",
+    "breed": "Labrador",
+    "dateOfBirth": "2020-03-15",
+    "microchipNumber": "123456789012345"
+  }
+}

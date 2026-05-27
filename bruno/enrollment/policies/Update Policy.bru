@@ -1,0 +1,18 @@
+meta {
+  name: Update Policy
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/policies/{{policyId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "endDate": "2027-12-31",
+    "status": "ACTIVE"
+  }
+}

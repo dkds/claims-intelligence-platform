@@ -1,0 +1,20 @@
+meta {
+  name: Register Owner
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/clinics/{{clinicId}}/owners
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName": "Alice",
+    "lastName": "Smith",
+    "email": "alice.smith@example.com",
+    "phone": "+44 7700 900000"
+  }
+}

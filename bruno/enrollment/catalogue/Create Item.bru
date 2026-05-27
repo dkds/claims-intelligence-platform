@@ -1,0 +1,19 @@
+meta {
+  name: Create Item
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/catalogue
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "code": "CONSULT-STD",
+    "description": "Standard consultation",
+    "reimbursementRate": 50.00
+  }
+}

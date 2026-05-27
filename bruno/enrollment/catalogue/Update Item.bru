@@ -1,0 +1,18 @@
+meta {
+  name: Update Item
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/catalogue/{{catalogueItemId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "description": "Standard consultation (updated)",
+    "reimbursementRate": 55.00
+  }
+}

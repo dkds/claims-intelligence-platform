@@ -1,0 +1,18 @@
+meta {
+  name: Update Owner
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/owners/{{ownerId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "alice.updated@example.com",
+    "phone": "+44 7700 900001"
+  }
+}
