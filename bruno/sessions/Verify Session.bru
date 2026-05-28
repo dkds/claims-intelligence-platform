@@ -1,0 +1,17 @@
+meta {
+  name: Verify Session
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{sessionsBaseUrl}}/sessions/{{sessionId}}/verify
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "verifiedBy": "00000000-0000-0000-0000-000000000001"
+  }
+}

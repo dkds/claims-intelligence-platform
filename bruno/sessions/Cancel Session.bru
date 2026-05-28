@@ -1,0 +1,11 @@
+meta {
+  name: Cancel Session
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{sessionsBaseUrl}}/sessions/{{sessionId}}/cancel
+  body: none
+  auth: none
+}

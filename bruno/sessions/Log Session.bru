@@ -1,0 +1,21 @@
+meta {
+  name: Log Session
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{sessionsBaseUrl}}/clinics/{{clinicId}}/sessions
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "vetId": "{{vetId}}",
+    "petId": "{{petId}}",
+    "lines": [
+      { "procedureCode": "CONSULT", "quantity": 1, "notes": "Annual checkup" }
+    ]
+  }
+}

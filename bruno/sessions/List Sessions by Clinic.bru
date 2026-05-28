@@ -1,0 +1,11 @@
+meta {
+  name: List Sessions by Clinic
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{sessionsBaseUrl}}/clinics/{{clinicId}}/sessions
+  body: none
+  auth: none
+}
