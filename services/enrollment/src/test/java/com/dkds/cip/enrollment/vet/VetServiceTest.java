@@ -1,6 +1,7 @@
 package com.dkds.cip.enrollment.vet;
 
 import com.dkds.cip.enrollment.clinic.ClinicService;
+import com.dkds.cip.enrollment.common.event.EnrollmentEventPublisher;
 import com.dkds.cip.enrollment.common.exception.ResourceNotFoundException;
 import com.dkds.cip.enrollment.vet.dto.RegisterVetRequest;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,8 @@ class VetServiceTest {
     VetRepository repository;
     @Mock
     ClinicService clinicService;
+    @Mock
+    EnrollmentEventPublisher eventPublisher;
     @InjectMocks
     VetService service;
 

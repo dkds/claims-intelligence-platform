@@ -2,6 +2,8 @@ package com.dkds.cip.enrollment.catalogue;
 
 import com.dkds.cip.enrollment.catalogue.dto.CreateCatalogueItemRequest;
 import com.dkds.cip.enrollment.catalogue.dto.UpdateCatalogueItemRequest;
+import com.dkds.cip.enrollment.common.event.EnrollmentEventPublisher;
+import com.dkds.cip.enrollment.common.event.payload.CatalogueUpdatedPayload;
 import com.dkds.cip.enrollment.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class CatalogueService {
 
     private final CatalogueItemRepository repository;
+    private final EnrollmentEventPublisher eventPublisher;
 
     @Transactional
     public CatalogueItem create(CreateCatalogueItemRequest req) {
@@ -24,7 +27,11 @@ public class CatalogueService {
         item.setDescription(req.description());
         item.setReimbursementRate(req.reimbursementRate());
         item.setCreatedAt(Instant.now());
-        return repository.save(item);
+        var saved = repository.save(item);
+        eventPublisher.publish("catalogue.updated", "catalogue-item", saved.getId(), null,
+                new CatalogueUpdatedPayload(saved.getId(), saved.getCode(), saved.getDescription(),
+                        saved.getReimbursementRate(), saved.isActive()));
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -44,7 +51,11 @@ public class CatalogueService {
         if (req.description() != null) item.setDescription(req.description());
         if (req.reimbursementRate() != null) item.setReimbursementRate(req.reimbursementRate());
         item.setUpdatedAt(Instant.now());
-        return repository.save(item);
+        var saved = repository.save(item);
+        eventPublisher.publish("catalogue.updated", "catalogue-item", saved.getId(), null,
+                new CatalogueUpdatedPayload(saved.getId(), saved.getCode(), saved.getDescription(),
+                        saved.getReimbursementRate(), saved.isActive()));
+        return saved;
     }
 
     @Transactional
@@ -52,6 +63,9 @@ public class CatalogueService {
         var item = getById(id);
         item.setActive(false);
         item.setUpdatedAt(Instant.now());
-        repository.save(item);
+        var saved = repository.save(item);
+        eventPublisher.publish("catalogue.updated", "catalogue-item", saved.getId(), null,
+                new CatalogueUpdatedPayload(saved.getId(), saved.getCode(), saved.getDescription(),
+                        saved.getReimbursementRate(), saved.isActive()));
     }
 }

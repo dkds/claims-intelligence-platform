@@ -1,4 +1,5 @@
-CREATE TABLE clinic (
+CREATE TABLE clinic
+(
     id            UUID         NOT NULL,
     name          VARCHAR(255) NOT NULL,
     address_line1 VARCHAR(255),
@@ -9,13 +10,14 @@ CREATE TABLE clinic (
     contact_email VARCHAR(255),
     contact_phone VARCHAR(50),
     status        VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE'
-                      CHECK (status IN ('ACTIVE', 'SUSPENDED')),
+        CHECK (status IN ('ACTIVE', 'SUSPENDED')),
     registered_at TIMESTAMPTZ  NOT NULL,
     updated_at    TIMESTAMPTZ,
     CONSTRAINT pk_clinic PRIMARY KEY (id)
 );
 
-CREATE TABLE owner (
+CREATE TABLE owner
+(
     id         UUID         NOT NULL,
     clinic_id  UUID         NOT NULL,
     first_name VARCHAR(100) NOT NULL,
@@ -27,7 +29,8 @@ CREATE TABLE owner (
     CONSTRAINT fk_owner_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (id)
 );
 
-CREATE TABLE vet (
+CREATE TABLE vet
+(
     id               UUID         NOT NULL,
     clinic_id        UUID         NOT NULL,
     first_name       VARCHAR(100) NOT NULL,
@@ -35,7 +38,7 @@ CREATE TABLE vet (
     email            VARCHAR(255),
     license_number   VARCHAR(100) NOT NULL,
     status           VARCHAR(20)  NOT NULL DEFAULT 'PENDING'
-                         CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
+        CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED')),
     rejection_reason VARCHAR(500),
     registered_at    TIMESTAMPTZ  NOT NULL,
     updated_at       TIMESTAMPTZ,
@@ -43,7 +46,8 @@ CREATE TABLE vet (
     CONSTRAINT fk_vet_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (id)
 );
 
-CREATE TABLE pet (
+CREATE TABLE pet
+(
     id               UUID         NOT NULL,
     clinic_id        UUID         NOT NULL,
     owner_id         UUID         NOT NULL,
@@ -53,14 +57,15 @@ CREATE TABLE pet (
     date_of_birth    DATE,
     microchip_number VARCHAR(50),
     status           VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE'
-                         CHECK (status IN ('ACTIVE', 'INACTIVE')),
+        CHECK (status IN ('ACTIVE', 'INACTIVE')),
     enrolled_at      TIMESTAMPTZ  NOT NULL,
     CONSTRAINT pk_pet PRIMARY KEY (id),
     CONSTRAINT fk_pet_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (id),
-    CONSTRAINT fk_pet_owner  FOREIGN KEY (owner_id)  REFERENCES owner (id)
+    CONSTRAINT fk_pet_owner FOREIGN KEY (owner_id) REFERENCES owner (id)
 );
 
-CREATE TABLE catalogue_item (
+CREATE TABLE catalogue_item
+(
     id                 UUID           NOT NULL,
     code               VARCHAR(50)    NOT NULL,
     description        VARCHAR(500)   NOT NULL,
@@ -72,23 +77,24 @@ CREATE TABLE catalogue_item (
     CONSTRAINT uq_catalogue_item_code UNIQUE (code)
 );
 
-CREATE TABLE policy (
+CREATE TABLE policy
+(
     id            UUID        NOT NULL,
     pet_id        UUID        NOT NULL,
     coverage_type VARCHAR(20) NOT NULL
-                      CHECK (coverage_type IN ('BASIC', 'STANDARD', 'PREMIUM')),
+        CHECK (coverage_type IN ('BASIC', 'STANDARD', 'PREMIUM')),
     start_date    DATE        NOT NULL,
     end_date      DATE        NOT NULL,
     status        VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
-                      CHECK (status IN ('ACTIVE', 'EXPIRED', 'CANCELLED')),
+        CHECK (status IN ('ACTIVE', 'EXPIRED', 'CANCELLED')),
     created_at    TIMESTAMPTZ NOT NULL,
     updated_at    TIMESTAMPTZ,
     CONSTRAINT pk_policy PRIMARY KEY (id),
     CONSTRAINT fk_policy_pet FOREIGN KEY (pet_id) REFERENCES pet (id)
 );
 
-CREATE INDEX idx_owner_clinic  ON owner (clinic_id);
-CREATE INDEX idx_vet_clinic    ON vet (clinic_id);
-CREATE INDEX idx_pet_clinic    ON pet (clinic_id);
-CREATE INDEX idx_pet_owner     ON pet (owner_id);
-CREATE INDEX idx_policy_pet    ON policy (pet_id);
+CREATE INDEX idx_owner_clinic ON owner (clinic_id);
+CREATE INDEX idx_vet_clinic ON vet (clinic_id);
+CREATE INDEX idx_pet_clinic ON pet (clinic_id);
+CREATE INDEX idx_pet_owner ON pet (owner_id);
+CREATE INDEX idx_policy_pet ON policy (pet_id);

@@ -39,3 +39,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+cip:
+  kafka:
+    topics:
+      enrollment: cip.enrollment.v1

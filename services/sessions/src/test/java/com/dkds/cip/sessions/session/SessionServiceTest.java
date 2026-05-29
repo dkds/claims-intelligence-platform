@@ -42,6 +42,8 @@ class SessionServiceTest {
     LocalPolicyRepository policyRepository;
     @Mock
     LocalCatalogueItemRepository catalogueRepository;
+    @Mock
+    SessionEventPublisher eventPublisher;
 
     @InjectMocks
     SessionService service;
@@ -196,8 +198,6 @@ class SessionServiceTest {
         assertThatThrownBy(() -> service.getById(id))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
-
-    // --- helpers ---
 
     private LocalVet vet(UUID clinicId, LocalVetStatus status) {
         var v = new LocalVet();

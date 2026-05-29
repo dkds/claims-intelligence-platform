@@ -1,6 +1,10 @@
 package com.dkds.cip.enrollment.vet;
 
 import com.dkds.cip.enrollment.clinic.ClinicService;
+import com.dkds.cip.enrollment.common.event.EnrollmentEventPublisher;
+import com.dkds.cip.enrollment.common.event.payload.VetApprovedPayload;
+import com.dkds.cip.enrollment.common.event.payload.VetRegisteredPayload;
+import com.dkds.cip.enrollment.common.event.payload.VetRejectedPayload;
 import com.dkds.cip.enrollment.common.exception.ResourceNotFoundException;
 import com.dkds.cip.enrollment.vet.dto.RegisterVetRequest;
 import com.dkds.cip.enrollment.vet.dto.UpdateVetRequest;
@@ -18,6 +22,7 @@ public class VetService {
 
     private final VetRepository repository;
     private final ClinicService clinicService;
+    private final EnrollmentEventPublisher eventPublisher;
 
     @Transactional
     public Vet register(UUID clinicId, RegisterVetRequest req) {
@@ -29,7 +34,11 @@ public class VetService {
         vet.setEmail(req.email());
         vet.setLicenseNumber(req.licenseNumber());
         vet.setRegisteredAt(Instant.now());
-        return repository.save(vet);
+        var saved = repository.save(vet);
+        eventPublisher.publish("vet.registered", "vet", saved.getId(), clinicId,
+                new VetRegisteredPayload(saved.getId(), clinicId,
+                        saved.getFirstName(), saved.getLastName(), saved.getStatus().name()));
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +73,10 @@ public class VetService {
         }
         vet.setStatus(VetStatus.APPROVED);
         vet.setUpdatedAt(Instant.now());
-        return repository.save(vet);
+        var saved = repository.save(vet);
+        eventPublisher.publish("vet.approved", "vet", saved.getId(), saved.getClinicId(),
+                new VetApprovedPayload(saved.getId(), saved.getClinicId()));
+        return saved;
     }
 
     @Transactional
@@ -77,6 +89,9 @@ public class VetService {
         vet.setStatus(VetStatus.REJECTED);
         vet.setRejectionReason(reason);
         vet.setUpdatedAt(Instant.now());
-        return repository.save(vet);
+        var saved = repository.save(vet);
+        eventPublisher.publish("vet.rejected", "vet", saved.getId(), saved.getClinicId(),
+                new VetRejectedPayload(saved.getId(), saved.getClinicId(), reason));
+        return saved;
     }
 }

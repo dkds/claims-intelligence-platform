@@ -27,6 +27,7 @@ public class SessionService {
     private final LocalPetRepository petRepository;
     private final LocalPolicyRepository policyRepository;
     private final LocalCatalogueItemRepository catalogueRepository;
+    private final SessionEventPublisher eventPublisher;
 
     @Transactional
     public Session log(UUID clinicId, LogSessionRequest req) {
@@ -77,7 +78,9 @@ public class SessionService {
             session.getLines().add(line);
         }
 
-        return sessionRepository.save(session);
+        var saved = sessionRepository.save(session);
+        eventPublisher.publishSessionLogged(saved);
+        return saved;
     }
 
     @Transactional
@@ -90,7 +93,9 @@ public class SessionService {
         session.setStatus(SessionStatus.VERIFIED);
         session.setVerifiedAt(Instant.now());
         session.setVerifiedBy(verifiedBy);
-        return sessionRepository.save(session);
+        var saved = sessionRepository.save(session);
+        eventPublisher.publishSessionVerified(saved);
+        return saved;
     }
 
     @Transactional

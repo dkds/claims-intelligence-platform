@@ -1,5 +1,7 @@
 package com.dkds.cip.enrollment.policy;
 
+import com.dkds.cip.enrollment.common.event.EnrollmentEventPublisher;
+import com.dkds.cip.enrollment.common.event.payload.PolicyAssignedPayload;
 import com.dkds.cip.enrollment.common.exception.ResourceNotFoundException;
 import com.dkds.cip.enrollment.pet.PetService;
 import com.dkds.cip.enrollment.policy.dto.AssignPolicyRequest;
@@ -18,17 +20,22 @@ public class PolicyService {
 
     private final PolicyRepository repository;
     private final PetService petService;
+    private final EnrollmentEventPublisher eventPublisher;
 
     @Transactional
     public Policy assign(UUID petId, AssignPolicyRequest req) {
-        petService.throwIfNotExists(petId);
+        var pet = petService.getById(petId);
         var policy = new Policy();
         policy.setPetId(petId);
         policy.setCoverageType(req.coverageType());
         policy.setStartDate(req.startDate());
         policy.setEndDate(req.endDate());
         policy.setCreatedAt(Instant.now());
-        return repository.save(policy);
+        var saved = repository.save(policy);
+        eventPublisher.publish("policy.assigned", "policy", saved.getId(), pet.getClinicId(),
+                new PolicyAssignedPayload(saved.getId(), petId, saved.getCoverageType().name(),
+                        saved.getStartDate(), saved.getEndDate(), saved.getStatus().name()));
+        return saved;
     }
 
     @Transactional(readOnly = true)

@@ -2,6 +2,9 @@ package com.dkds.cip.enrollment.clinic;
 
 import com.dkds.cip.enrollment.clinic.dto.RegisterClinicRequest;
 import com.dkds.cip.enrollment.clinic.dto.UpdateClinicRequest;
+import com.dkds.cip.enrollment.common.event.EnrollmentEventPublisher;
+import com.dkds.cip.enrollment.common.event.payload.ClinicRegisteredPayload;
+import com.dkds.cip.enrollment.common.event.payload.ClinicUpdatedPayload;
 import com.dkds.cip.enrollment.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class ClinicService {
 
     private final ClinicRepository repository;
+    private final EnrollmentEventPublisher eventPublisher;
 
     @Transactional
     public Clinic register(RegisterClinicRequest req) {
@@ -29,7 +33,10 @@ public class ClinicService {
         clinic.setContactEmail(req.contactEmail());
         clinic.setContactPhone(req.contactPhone());
         clinic.setRegisteredAt(Instant.now());
-        return repository.save(clinic);
+        var saved = repository.save(clinic);
+        eventPublisher.publish("clinic.updated", "clinic", saved.getId(), saved.getId(),
+                new ClinicRegisteredPayload(saved.getId(), saved.getName(), saved.getStatus().name()));
+        return saved;
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +67,10 @@ public class ClinicService {
         if (req.contactEmail() != null) clinic.setContactEmail(req.contactEmail());
         if (req.contactPhone() != null) clinic.setContactPhone(req.contactPhone());
         clinic.setUpdatedAt(Instant.now());
-        return repository.save(clinic);
+        var saved = repository.save(clinic);
+        eventPublisher.publish("clinic.updated", "clinic", saved.getId(), saved.getId(),
+                new ClinicUpdatedPayload(saved.getId(), saved.getName(), saved.getStatus().name()));
+        return saved;
     }
 
     @Transactional
@@ -68,6 +78,8 @@ public class ClinicService {
         var clinic = getById(id);
         clinic.setStatus(ClinicStatus.SUSPENDED);
         clinic.setUpdatedAt(Instant.now());
-        repository.save(clinic);
+        var saved = repository.save(clinic);
+        eventPublisher.publish("clinic.updated", "clinic", saved.getId(), saved.getId(),
+                new ClinicUpdatedPayload(saved.getId(), saved.getName(), saved.getStatus().name()));
     }
 }

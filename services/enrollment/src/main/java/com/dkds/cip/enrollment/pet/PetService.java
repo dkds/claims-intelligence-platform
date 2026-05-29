@@ -1,6 +1,8 @@
 package com.dkds.cip.enrollment.pet;
 
 import com.dkds.cip.enrollment.clinic.ClinicService;
+import com.dkds.cip.enrollment.common.event.EnrollmentEventPublisher;
+import com.dkds.cip.enrollment.common.event.payload.PetEnrolledPayload;
 import com.dkds.cip.enrollment.common.exception.ResourceNotFoundException;
 import com.dkds.cip.enrollment.owner.OwnerService;
 import com.dkds.cip.enrollment.pet.dto.EnrolPetRequest;
@@ -20,6 +22,7 @@ public class PetService {
     private final PetRepository repository;
     private final ClinicService clinicService;
     private final OwnerService ownerService;
+    private final EnrollmentEventPublisher eventPublisher;
 
     @Transactional
     public Pet enrol(UUID clinicId, EnrolPetRequest req) {
@@ -34,7 +37,11 @@ public class PetService {
         pet.setDateOfBirth(req.dateOfBirth());
         pet.setMicrochipNumber(req.microchipNumber());
         pet.setEnrolledAt(Instant.now());
-        return repository.save(pet);
+        var saved = repository.save(pet);
+        eventPublisher.publish("pet.enrolled", "pet", saved.getId(), clinicId,
+                new PetEnrolledPayload(saved.getId(), clinicId, saved.getOwnerId(),
+                        saved.getName(), saved.getStatus().name()));
+        return saved;
     }
 
     @Transactional(readOnly = true)
