@@ -1,0 +1,163 @@
+package com.dkds.cip.claims.claim;
+
+import com.dkds.cip.claims.adjudication.AdjudicationDecision;
+import com.dkds.cip.claims.adjudication.RulesEngine;
+import com.dkds.cip.claims.claim.dto.SubmitManualClaimRequest;
+import com.dkds.cip.claims.common.exception.ResourceNotFoundException;
+import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItem;
+import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItemRepository;
+import com.dkds.cip.claims.masterdata.clinic.LocalClinicRepository;
+import com.dkds.cip.claims.masterdata.clinic.LocalClinicStatus;
+import com.dkds.cip.claims.masterdata.pet.LocalPetRepository;
+import com.dkds.cip.claims.masterdata.pet.LocalPetStatus;
+import com.dkds.cip.claims.masterdata.policy.LocalPolicyRepository;
+import com.dkds.cip.claims.masterdata.policy.LocalPolicyStatus;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ClaimService {
+
+    private final ClaimRepository claimRepository;
+    private final LocalClinicRepository clinicRepository;
+    private final LocalPetRepository petRepository;
+    private final LocalPolicyRepository policyRepository;
+    private final LocalCatalogueItemRepository catalogueRepository;
+    private final RulesEngine rulesEngine;
+    private final ClaimEventPublisher eventPublisher;
+
+    @Transactional
+    public Claim submitManualClaim(UUID clinicId, SubmitManualClaimRequest req) {
+        var clinic = clinicRepository.findById(clinicId)
+                .orElseThrow(() -> new ResourceNotFoundException("Clinic not found: " + clinicId));
+        if (clinic.getStatus() != LocalClinicStatus.ACTIVE) {
+            throw new IllegalStateException("Clinic " + clinicId + " is not ACTIVE");
+        }
+
+        var pet = petRepository.findById(req.petId())
+                .orElseThrow(() -> new ResourceNotFoundException("Pet not found: " + req.petId()));
+        if (pet.getStatus() != LocalPetStatus.ACTIVE) {
+            throw new IllegalStateException("Pet " + req.petId() + " is not ACTIVE");
+        }
+        if (!pet.getClinicId().equals(clinicId)) {
+            throw new IllegalStateException("Pet " + req.petId() + " does not belong to clinic " + clinicId);
+        }
+
+        var policy = policyRepository.findById(req.policyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Policy not found: " + req.policyId()));
+        if (policy.getStatus() != LocalPolicyStatus.ACTIVE) {
+            throw new IllegalStateException("Policy " + req.policyId() + " is not ACTIVE");
+        }
+        if (!policy.getPetId().equals(req.petId())) {
+            throw new IllegalStateException("Policy " + req.policyId() + " does not belong to pet " + req.petId());
+        }
+
+        var procedureCodes = req.lines().stream().map(l -> l.procedureCode()).collect(Collectors.toSet());
+        var catalogueMap = buildCatalogueMap(procedureCodes);
+
+        var claim = new Claim();
+        claim.setClinicId(clinicId);
+        claim.setPetId(req.petId());
+        claim.setPolicyId(req.policyId());
+        claim.setOrigin(ClaimOrigin.MANUAL);
+        claim.setSubmittedBy(req.submittedBy());
+        claim.setStatus(ClaimStatus.ASSEMBLED);
+        claim.setCreatedAt(Instant.now());
+
+        var totalRequested = BigDecimal.ZERO;
+        for (var lineReq : req.lines()) {
+            var line = new ClaimLine();
+            line.setClaim(claim);
+            line.setProcedureCode(lineReq.procedureCode());
+            line.setQuantity(lineReq.quantity());
+            line.setRequestedAmount(lineReq.requestedAmount());
+            claim.getLines().add(line);
+            totalRequested = totalRequested.add(lineReq.requestedAmount());
+        }
+        claim.setTotalRequested(totalRequested);
+
+        addTransition(claim, null, ClaimStatus.ASSEMBLED, "auto", null);
+
+        var saved = claimRepository.save(claim);
+        eventPublisher.publishAssembled(saved);
+
+        return adjudicate(saved, Optional.of(policy), catalogueMap);
+    }
+
+    @Transactional(readOnly = true)
+    public Claim getById(UUID id) {
+        return claimRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found: " + id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Claim> listByClinic(UUID clinicId, Optional<ClaimStatus> status) {
+        return status.map(s -> claimRepository.findByClinicIdAndStatus(clinicId, s))
+                .orElseGet(() -> claimRepository.findByClinicId(clinicId));
+    }
+
+    Claim adjudicate(Claim claim,
+                     Optional<com.dkds.cip.claims.masterdata.policy.LocalPolicy> policy,
+                     Map<String, LocalCatalogueItem> catalogue) {
+        var result = rulesEngine.adjudicate(claim.getLines(), policy, catalogue);
+
+        switch (result.decision()) {
+            case APPROVED, PARTIALLY_APPROVED -> {
+                var decision = result.decision() == AdjudicationDecision.APPROVED
+                        ? AdjudicationDecision.APPROVED : AdjudicationDecision.PARTIALLY_APPROVED;
+                addTransition(claim, ClaimStatus.ASSEMBLED, ClaimStatus.ADJUDICATED, "auto",
+                        String.join("; ", result.reasons()));
+                claim.setStatus(ClaimStatus.ADJUDICATED);
+                claim.setAdjudicationDecision(decision);
+                claim.setApprovedAmount(result.totalApproved());
+                claim.setUpdatedAt(Instant.now());
+                var saved = claimRepository.save(claim);
+                eventPublisher.publishAdjudicated(saved);
+
+                addTransition(saved, ClaimStatus.ADJUDICATED, ClaimStatus.READY_FOR_SUBMISSION, "auto", null);
+                saved.setStatus(ClaimStatus.READY_FOR_SUBMISSION);
+                saved.setUpdatedAt(Instant.now());
+                var ready = claimRepository.save(saved);
+                eventPublisher.publishReadyForSubmission(ready);
+                return ready;
+            }
+            case REJECTED -> {
+                addTransition(claim, ClaimStatus.ASSEMBLED, ClaimStatus.REJECTED, "auto",
+                        String.join("; ", result.reasons()));
+                claim.setStatus(ClaimStatus.REJECTED);
+                claim.setUpdatedAt(Instant.now());
+                var saved = claimRepository.save(claim);
+                eventPublisher.publishRejected(saved, result.reasons());
+                return saved;
+            }
+        }
+        return claim;
+    }
+
+    private Map<String, LocalCatalogueItem> buildCatalogueMap(java.util.Set<String> codes) {
+        return codes.stream()
+                .flatMap(code -> catalogueRepository.findByCode(code).stream())
+                .collect(Collectors.toMap(LocalCatalogueItem::getCode, item -> item));
+    }
+
+    private void addTransition(Claim claim, ClaimStatus from, ClaimStatus to, String actor, String reason) {
+        var t = new ClaimTransition();
+        t.setClaim(claim);
+        t.setFromStatus(from);
+        t.setToStatus(to);
+        t.setActor(actor);
+        t.setReason(reason);
+        t.setOccurredAt(Instant.now());
+        claim.getTransitions().add(t);
+    }
+}
