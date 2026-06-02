@@ -28,11 +28,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ClaimControllerTest extends AbstractIntegrationTest {
 
-    @Autowired LocalClinicRepository clinicRepo;
-    @Autowired LocalPetRepository petRepo;
-    @Autowired LocalPolicyRepository policyRepo;
-    @Autowired LocalCatalogueItemRepository catalogueRepo;
-    @Autowired ClaimRepository claimRepo;
+    @Autowired
+    LocalClinicRepository clinicRepo;
+    @Autowired
+    LocalPetRepository petRepo;
+    @Autowired
+    LocalPolicyRepository policyRepo;
+    @Autowired
+    LocalCatalogueItemRepository catalogueRepo;
+    @Autowired
+    ClaimRepository claimRepo;
 
     private UUID clinicId;
     private UUID petId;

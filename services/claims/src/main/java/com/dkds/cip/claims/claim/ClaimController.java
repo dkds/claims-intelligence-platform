@@ -31,7 +31,7 @@ public class ClaimController {
 
     @GetMapping("/clinics/{clinicId}/claims")
     public List<ClaimResponse> listByClinic(@PathVariable UUID clinicId,
-                                             @RequestParam(required = false) ClaimStatus status) {
+                                            @RequestParam(required = false) ClaimStatus status) {
         return service.listByClinic(clinicId, Optional.ofNullable(status))
                 .stream().map(ClaimResponse::from).toList();
     }

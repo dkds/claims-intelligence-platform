@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public interface ClaimRepository extends JpaRepository<Claim, UUID> {
     List<Claim> findByClinicId(UUID clinicId);
+
     List<Claim> findByClinicIdAndStatus(UUID clinicId, ClaimStatus status);
+
     List<Claim> findByPetId(UUID petId);
 }

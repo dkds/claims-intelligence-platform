@@ -2,9 +2,9 @@ package com.dkds.cip.claims.claim;
 
 import com.dkds.cip.claims.adjudication.AdjudicationDecision;
 import com.dkds.cip.claims.adjudication.RulesEngine;
+import com.dkds.cip.claims.claim.dto.ManualClaimLineRequest;
 import com.dkds.cip.claims.claim.dto.SubmitManualClaimRequest;
 import com.dkds.cip.claims.common.exception.ResourceNotFoundException;
-import com.dkds.cip.claims.masterdata.session.SessionVerifiedPayload;
 import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItem;
 import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItemRepository;
 import com.dkds.cip.claims.masterdata.clinic.LocalClinicRepository;
@@ -13,6 +13,8 @@ import com.dkds.cip.claims.masterdata.pet.LocalPetRepository;
 import com.dkds.cip.claims.masterdata.pet.LocalPetStatus;
 import com.dkds.cip.claims.masterdata.policy.LocalPolicyRepository;
 import com.dkds.cip.claims.masterdata.policy.LocalPolicyStatus;
+import com.dkds.cip.claims.masterdata.session.SessionLinePayload;
+import com.dkds.cip.claims.masterdata.session.SessionVerifiedPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -65,7 +67,7 @@ public class ClaimService {
             throw new IllegalStateException("Policy " + req.policyId() + " does not belong to pet " + req.petId());
         }
 
-        var procedureCodes = req.lines().stream().map(l -> l.procedureCode()).collect(Collectors.toSet());
+        var procedureCodes = req.lines().stream().map(ManualClaimLineRequest::procedureCode).collect(Collectors.toSet());
         var catalogueMap = buildCatalogueMap(procedureCodes);
 
         var claim = new Claim();
@@ -115,7 +117,7 @@ public class ClaimService {
         var policy = policies.get(0);
 
         var procedureCodes = payload.lines().stream()
-                .map(l -> l.procedureCode())
+                .map(SessionLinePayload::procedureCode)
                 .collect(java.util.stream.Collectors.toSet());
         var catalogueMap = buildCatalogueMap(procedureCodes);
 

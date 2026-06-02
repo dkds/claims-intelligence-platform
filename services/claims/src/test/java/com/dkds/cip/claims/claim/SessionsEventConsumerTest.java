@@ -27,12 +27,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SessionsEventConsumerTest extends AbstractIntegrationTest {
 
-    @Autowired SessionsEventConsumer consumer;
-    @Autowired ClaimRepository claimRepo;
-    @Autowired LocalClinicRepository clinicRepo;
-    @Autowired LocalPetRepository petRepo;
-    @Autowired LocalPolicyRepository policyRepo;
-    @Autowired LocalCatalogueItemRepository catalogueRepo;
+    @Autowired
+    SessionsEventConsumer consumer;
+    @Autowired
+    ClaimRepository claimRepo;
+    @Autowired
+    LocalClinicRepository clinicRepo;
+    @Autowired
+    LocalPetRepository petRepo;
+    @Autowired
+    LocalPolicyRepository policyRepo;
+    @Autowired
+    LocalCatalogueItemRepository catalogueRepo;
 
     private UUID clinicId;
     private UUID petId;
