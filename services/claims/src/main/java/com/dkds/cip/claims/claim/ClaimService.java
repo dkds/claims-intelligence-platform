@@ -4,6 +4,7 @@ import com.dkds.cip.claims.adjudication.AdjudicationDecision;
 import com.dkds.cip.claims.adjudication.RulesEngine;
 import com.dkds.cip.claims.claim.dto.SubmitManualClaimRequest;
 import com.dkds.cip.claims.common.exception.ResourceNotFoundException;
+import com.dkds.cip.claims.masterdata.session.SessionVerifiedPayload;
 import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItem;
 import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItemRepository;
 import com.dkds.cip.claims.masterdata.clinic.LocalClinicRepository;
@@ -13,6 +14,7 @@ import com.dkds.cip.claims.masterdata.pet.LocalPetStatus;
 import com.dkds.cip.claims.masterdata.policy.LocalPolicyRepository;
 import com.dkds.cip.claims.masterdata.policy.LocalPolicyStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClaimService {
@@ -88,6 +91,61 @@ public class ClaimService {
 
         addTransition(claim, null, ClaimStatus.ASSEMBLED, "auto", null);
 
+        var saved = claimRepository.save(claim);
+        eventPublisher.publishAssembled(saved);
+
+        return adjudicate(saved, Optional.of(policy), catalogueMap);
+    }
+
+    @Transactional
+    public Claim assembleFromSession(SessionVerifiedPayload payload) {
+        var pet = petRepository.findById(payload.petId()).orElse(null);
+        if (pet == null || pet.getStatus() != LocalPetStatus.ACTIVE) {
+            log.warn("Skipping session.verified {} — pet {} not found or inactive",
+                    payload.sessionId(), payload.petId());
+            return null;
+        }
+
+        var policies = policyRepository.findByPetIdAndStatus(payload.petId(), LocalPolicyStatus.ACTIVE);
+        if (policies.isEmpty()) {
+            log.warn("Skipping session.verified {} — no active policy for pet {}",
+                    payload.sessionId(), payload.petId());
+            return null;
+        }
+        var policy = policies.get(0);
+
+        var procedureCodes = payload.lines().stream()
+                .map(l -> l.procedureCode())
+                .collect(java.util.stream.Collectors.toSet());
+        var catalogueMap = buildCatalogueMap(procedureCodes);
+
+        var claim = new Claim();
+        claim.setClinicId(payload.clinicId());
+        claim.setPetId(payload.petId());
+        claim.setPolicyId(policy.getId());
+        claim.setOrigin(ClaimOrigin.SESSION);
+        claim.setSourceSessionId(payload.sessionId());
+        claim.setSubmittedBy(payload.verifiedBy());
+        claim.setStatus(ClaimStatus.ASSEMBLED);
+        claim.setCreatedAt(Instant.now());
+
+        var totalRequested = BigDecimal.ZERO;
+        for (var linePayload : payload.lines()) {
+            var line = new ClaimLine();
+            line.setClaim(claim);
+            line.setProcedureCode(linePayload.procedureCode());
+            line.setQuantity(linePayload.quantity());
+            var catalogueItem = catalogueMap.get(linePayload.procedureCode());
+            var requestedAmount = catalogueItem != null
+                    ? catalogueItem.getReimbursementRate().multiply(BigDecimal.valueOf(linePayload.quantity()))
+                    : BigDecimal.ZERO;
+            line.setRequestedAmount(requestedAmount);
+            claim.getLines().add(line);
+            totalRequested = totalRequested.add(requestedAmount);
+        }
+        claim.setTotalRequested(totalRequested);
+
+        addTransition(claim, null, ClaimStatus.ASSEMBLED, "auto", null);
         var saved = claimRepository.save(claim);
         eventPublisher.publishAssembled(saved);
 
