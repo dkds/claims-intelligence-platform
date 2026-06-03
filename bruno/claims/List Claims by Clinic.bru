@@ -1,0 +1,15 @@
+meta {
+  name: List Claims by Clinic
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{claimsBaseUrl}}/clinics/{{clinicId}}/claims
+  body: none
+  auth: none
+}
+
+params:query {
+  ~status: ASSEMBLED
+}

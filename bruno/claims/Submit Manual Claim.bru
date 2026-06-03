@@ -1,0 +1,26 @@
+meta {
+  name: Submit Manual Claim
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{claimsBaseUrl}}/clinics/{{clinicId}}/claims
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "petId": "{{petId}}",
+    "policyId": "{{policyId}}",
+    "submittedBy": "{{clinicManagerId}}",
+    "lines": [
+      {
+        "procedureCode": "MED001",
+        "quantity": 1,
+        "requestedAmount": 45.00
+      }
+    ]
+  }
+}
