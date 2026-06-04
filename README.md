@@ -113,11 +113,11 @@ Tier 1 is built incrementally — something runnable at every step:
 | Phase | Focus | Status |
 |---|---|---|
 | 0 | Foundations: monorepo, dev container, infra, service stubs | Complete |
-| 1 | Enrollment & Policy: REST API, master data, vet approval | Upcoming |
-| 2 | Sessions + Kafka: first event flow, session verification | — |
-| 3 | Claims: assembly, rules engine, state machine | — |
-| 4 | Fraud Detection (Go) + triage routing | — |
-| 5 | Projection + BFF: CQRS read model | — |
+| 1 | Enrollment & Policy: REST API, master data, vet approval | Complete |
+| 2 | Sessions + Kafka: first event flow, session verification | Complete |
+| 3 | Claims: assembly, rules engine, state machine | Complete |
+| 4 | Fraud Detection (Go) + triage routing | Complete |
+| 5 | Projection + BFF: CQRS read model | Upcoming |
 | 6 | Clinic Workbench: end-to-end UI | — |
 | 7 | Hardening: outbox, schema registry, idempotency, auth | — |
 
@@ -128,5 +128,4 @@ Tier 1 is built incrementally — something runnable at every step:
 - [Project Scope](docs/scope.md) — domain model, functional requirements, service breakdown, and scope tiers
 - [Build Plan](docs/build-plan.md) — phased build sequence, principles, and repository layout
 - [Event & Messaging Design](docs/event-design.md) — Kafka topology, standard envelope, outbox pattern, and idempotency
-
-Architecture decision records will be added to `docs/adr/` as the build progresses.
+- [Architecture Decision Records](docs/adr/README.md) — key design decisions and their rationale
