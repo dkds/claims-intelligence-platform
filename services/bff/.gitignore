@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+
+# Environment configurations
+.env
+.env.local
+.env.*.local
