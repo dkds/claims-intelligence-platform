@@ -4,6 +4,7 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Kafka, Consumer } from 'kafkajs';
 import { ClaimProjector } from '../projections/claim/claim.projector.js';
 import { ClinicProjector } from '../projections/clinic/clinic.projector.js';
@@ -26,6 +27,7 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
   private consumer: Consumer;
 
   constructor(
+    private readonly config: ConfigService,
     private readonly clinicProjector: ClinicProjector,
     private readonly petProjector: PetProjector,
     private readonly vetProjector: VetProjector,
@@ -34,7 +36,7 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
   ) {
     const kafka = new Kafka({
       clientId: 'projection',
-      brokers: (process.env['KAFKA_BROKERS'] ?? 'redpanda:9092').split(','),
+      brokers: config.getOrThrow<string>('KAFKA_BROKERS').split(','),
     });
     this.consumer = kafka.consumer({ groupId: 'cip-projection' });
   }
@@ -61,7 +63,15 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.consumer.disconnect();
+    this.logger.log('Disconnecting Kafka consumer...');
+    try {
+      await this.consumer.disconnect();
+      this.logger.log('Kafka consumer disconnected');
+    } catch (err) {
+      this.logger.error(
+        `Error disconnecting Kafka consumer: ${(err as Error).message}`,
+      );
+    }
   }
 
   private async dispatch(topic: Topic, envelope: EventEnvelope): Promise<void> {
