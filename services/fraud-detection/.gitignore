@@ -1,0 +1,5 @@
+fraud-detection
+*.exe
+
+# Local environment
+.env
