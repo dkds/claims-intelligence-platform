@@ -1,0 +1,59 @@
+services:
+
+  enrollment:
+    build: ./enrollment
+    image: cip-enrollment:latest
+    ports:
+      - "8081:8081"
+    networks: [cip]
+
+  sessions:
+    build: ./sessions
+    image: cip-sessions:latest
+    ports:
+      - "8082:8082"
+    networks: [cip]
+
+  claims:
+    build: ./claims
+    image: cip-claims:latest
+    ports:
+      - "8083:8083"
+    networks: [cip]
+
+  fraud:
+    build: ./fraud-detection
+    image: cip-fraud:latest
+    networks: [cip]
+
+  projection:
+    build: ./projection
+    image: cip-projection:latest
+    ports:
+      - "3000:3000"
+    networks: [cip]
+
+  bff:
+    build: ./bff
+    image: cip-bff:latest
+    environment:
+      CLAIMS_URL: http://claims:8083
+      SESSIONS_URL: http://sessions:8082
+    ports:
+      - "3001:3001"
+    depends_on:
+      - projection
+    networks: [cip]
+
+  workbench:
+    build: ../web/clinic-workbench
+    image: cip-workbench:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - bff
+    networks: [cip]
+
+networks:
+  cip:
+    external: true
