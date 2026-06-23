@@ -3,57 +3,58 @@ services:
   enrollment:
     build: ./enrollment
     image: cip-enrollment:latest
-    ports:
-      - "8081:8081"
-    networks: [cip]
+    networks: [cip_services]
 
   sessions:
     build: ./sessions
     image: cip-sessions:latest
-    ports:
-      - "8082:8082"
-    networks: [cip]
+    networks: [cip_services]
 
   claims:
     build: ./claims
     image: cip-claims:latest
-    ports:
-      - "8083:8083"
-    networks: [cip]
+    networks: [cip_services]
 
   fraud:
     build: ./fraud-detection
     image: cip-fraud:latest
-    networks: [cip]
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+    networks: [cip_services]
 
   projection:
     build: ./projection
     image: cip-projection:latest
-    ports:
-      - "3000:3000"
-    networks: [cip]
+    environment:
+      PORT: "3000"
+      MONGODB_URI: mongodb://mongo:27017/cip_projection
+      KAFKA_BROKERS: redpanda:9092
+    networks: [cip_services]
 
   bff:
     build: ./bff
     image: cip-bff:latest
     environment:
+      PORT: "3001"
+      MONGODB_URI: mongodb://mongo:27017/cip_projection
       CLAIMS_URL: http://claims:8083
       SESSIONS_URL: http://sessions:8082
     ports:
       - "3001:3001"
     depends_on:
       - projection
-    networks: [cip]
+    networks: [cip_services]
 
-  workbench:
-    build: ../web/clinic-workbench
-    image: cip-workbench:latest
-    ports:
-      - "80:80"
-    depends_on:
-      - bff
-    networks: [cip]
+  # workbench:
+  #   build: ../web/clinic-workbench
+  #   image: cip-workbench:latest
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - bff
+  #   networks: [cip_services]
 
 networks:
-  cip:
+  cip_services:
+    name: cip
     external: true
