@@ -2,14 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EventEnvelope } from '../../common/event-envelope.interface.js';
-import { Session, SessionDocument } from './session.schema.js';
+import { Session } from './session.schema.js';
 
 @Injectable()
 export class SessionProjector {
   private readonly logger = new Logger(SessionProjector.name);
 
   constructor(
-    @InjectModel(Session.name) private readonly model: Model<SessionDocument>,
+    @InjectModel(Session.name) private readonly model: Model<Session>,
   ) {}
 
   async handle(envelope: EventEnvelope): Promise<void> {
@@ -19,13 +19,13 @@ export class SessionProjector {
 
     if (eventType === 'session.logged') {
       await this.model.findOneAndUpdate(
-        { filter },
+        filter,
         { $set: { _id: aggregateId, ...(payload as object) } },
         { upsert: true, new: true },
       );
     } else if (eventType === 'session.verified') {
       await this.model.findOneAndUpdate(
-        { filter },
+        filter,
         {
           $set: {
             status: 'VERIFIED',

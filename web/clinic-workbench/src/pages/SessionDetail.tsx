@@ -16,7 +16,7 @@ export function SessionDetail() {
   if (error || !session) return <ErrorMessage message="Session not found." />
 
   function handleVerify() {
-    verify.mutate(user!.email, { onSuccess: () => navigate('/sessions') })
+    verify.mutate(user!.id, { onSuccess: () => navigate('/sessions') })
   }
 
   return (
