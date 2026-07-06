@@ -3,10 +3,9 @@ import { Document } from 'mongoose';
 
 @Schema({ _id: false })
 class ClaimLine {
-  @Prop({ type: String }) lineId: string = '';
-  @Prop({ type: String }) description?: string;
-  @Prop({ type: Number }) amount: number = 0;
-  @Prop({ type: String }) category: string = 'DEFAULT';
+  @Prop({ type: String }) procedureCode: string = '';
+  @Prop({ type: Number }) quantity: number = 0;
+  @Prop({ type: Number }) requestedAmount: number = 0;
 }
 
 const ClaimLineSchema = SchemaFactory.createForClass(ClaimLine);

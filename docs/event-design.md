@@ -103,9 +103,10 @@ Payloads only (the envelope wraps each). Representative, not exhaustive.
   "origin": "session",
   "sourceSessionId": "sess-9920",
   "policyId": "pol-1002",
-  "lines": [ { "procedureCode": "DENT-CLEAN", "quantity": 1, "amount": 120.00 } ],
+  "lines": [ { "procedureCode": "DENT-CLEAN", "quantity": 1, "requestedAmount": 120.00 } ],
   "totalRequested": 120.00,
-  "submittedBy": "user-coord-58"
+  "submittedBy": "user-coord-58",
+  "assembledAt": "2026-07-06T10:15:00Z"
 }
 ```
 For a manual claim, `origin` is `"manual"` and `sourceSessionId` is absent.

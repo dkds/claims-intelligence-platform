@@ -8,7 +8,6 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://bff:3001',
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

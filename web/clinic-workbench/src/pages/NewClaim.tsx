@@ -38,7 +38,7 @@ export function NewClaim() {
       {
         petId: petId.trim(),
         policyId: policyId.trim(),
-        submittedBy: user!.email,
+        submittedBy: user!.id,
         lines: lines.map(l => ({
           procedureCode: l.procedureCode.trim(),
           quantity: parseInt(l.quantity, 10),

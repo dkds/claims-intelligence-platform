@@ -43,7 +43,7 @@ export class SessionsService {
     try {
       const res = await firstValueFrom(
         this.http.post(
-          `${this.sessionsUrl}/api/sessions/${sessionId}/verify`,
+          `${this.sessionsUrl}/sessions/${sessionId}/verify`,
           body,
         ),
       );

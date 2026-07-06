@@ -182,7 +182,7 @@ public class ClaimService {
                 claim.setApprovedAmount(result.totalApproved());
                 claim.setUpdatedAt(Instant.now());
                 var saved = claimRepository.save(claim);
-                eventPublisher.publishAdjudicated(saved);
+                eventPublisher.publishAdjudicated(saved, result.reasons());
 
                 addTransition(saved, ClaimStatus.ADJUDICATED, ClaimStatus.READY_FOR_SUBMISSION, "auto", null);
                 saved.setStatus(ClaimStatus.READY_FOR_SUBMISSION);

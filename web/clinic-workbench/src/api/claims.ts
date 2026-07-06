@@ -1,10 +1,9 @@
 import client from './client'
 
 export interface ClaimLine {
-  lineId: string
-  description?: string
-  amount: number
-  category: string
+  procedureCode: string
+  quantity: number
+  requestedAmount: number
 }
 
 export interface FraudResult {

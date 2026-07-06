@@ -44,7 +44,7 @@ export class ClaimsService {
     try {
       const res = await firstValueFrom(
         this.http.post(
-          `${this.claimsUrl}/api/clinics/${clinicId}/claims`,
+          `${this.claimsUrl}/clinics/${clinicId}/claims`,
           body,
         ),
       );

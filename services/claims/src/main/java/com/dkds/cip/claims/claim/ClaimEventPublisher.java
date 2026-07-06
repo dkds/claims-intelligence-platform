@@ -36,21 +36,23 @@ public class ClaimEventPublisher {
                 claim.getLines().stream()
                         .map(l -> new ClaimLinePayload(l.getProcedureCode(), l.getQuantity(), l.getRequestedAmount()))
                         .toList(),
-                claim.getTotalRequested()
+                claim.getTotalRequested(),
+                claim.getCreatedAt()
         );
         publish("claim.assembled", claim.getId(), claim.getClinicId(), payload);
     }
 
-    public void publishAdjudicated(Claim claim) {
+    public void publishAdjudicated(Claim claim, List<String> reasons) {
         var decision = claim.getAdjudicationDecision().name().toLowerCase().replace("_", "-");
         var payload = new ClaimAdjudicatedPayload(
                 claim.getId(),
                 decision,
                 claim.getApprovedAmount(),
-                List.of(),
+                reasons,
                 "auto",
                 claim.getOrigin().name().toLowerCase(),
-                claim.getSourceSessionId()
+                claim.getSourceSessionId(),
+                claim.getUpdatedAt()
         );
         publish("claim.adjudicated", claim.getId(), claim.getClinicId(), payload);
     }
@@ -60,7 +62,8 @@ public class ClaimEventPublisher {
                 claim.getId(),
                 reasons,
                 "auto",
-                claim.getOrigin().name().toLowerCase()
+                claim.getOrigin().name().toLowerCase(),
+                claim.getUpdatedAt()
         );
         publish("claim.rejected", claim.getId(), claim.getClinicId(), payload);
     }
@@ -75,7 +78,8 @@ public class ClaimEventPublisher {
                 decision,
                 claim.getApprovedAmount(),
                 claim.getOrigin().name().toLowerCase(),
-                claim.getSourceSessionId()
+                claim.getSourceSessionId(),
+                claim.getUpdatedAt()
         );
         publish("claim.ready-for-submission", claim.getId(), claim.getClinicId(), payload);
     }

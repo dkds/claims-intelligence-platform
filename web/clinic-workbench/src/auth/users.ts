@@ -16,7 +16,7 @@ export const DEMO_USERS: DemoUser[] = [
     password: 'demo',
     role: 'clinic_manager',
     name: 'Alex Manager',
-    clinicId: 'clinic-001',
+    clinicId: '00000000-0000-0000-0000-0000000000c1',
   },
   {
     id: '00000000-0000-0000-0000-000000000002',
@@ -24,6 +24,6 @@ export const DEMO_USERS: DemoUser[] = [
     password: 'demo',
     role: 'adjuster',
     name: 'Sam Adjuster',
-    clinicId: 'clinic-001',
+    clinicId: '00000000-0000-0000-0000-0000000000c1',
   },
 ]

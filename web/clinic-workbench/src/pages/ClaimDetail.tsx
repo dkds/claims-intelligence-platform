@@ -105,17 +105,17 @@ export function ClaimDetail() {
         <table className="w-full text-sm">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-4 py-2 text-left font-medium text-slate-500">Description</th>
-              <th className="px-4 py-2 text-left font-medium text-slate-500">Category</th>
+              <th className="px-4 py-2 text-left font-medium text-slate-500">Procedure</th>
+              <th className="px-4 py-2 text-right font-medium text-slate-500">Qty</th>
               <th className="px-4 py-2 text-right font-medium text-slate-500">Amount</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {claim.lines.map(l => (
-              <tr key={l.lineId}>
-                <td className="px-4 py-2 text-slate-700">{l.description ?? '—'}</td>
-                <td className="px-4 py-2 text-slate-500">{l.category}</td>
-                <td className="px-4 py-2 text-right text-slate-700">£{l.amount.toFixed(2)}</td>
+            {claim.lines.map((l, i) => (
+              <tr key={i}>
+                <td className="px-4 py-2 text-slate-700">{l.procedureCode}</td>
+                <td className="px-4 py-2 text-right text-slate-500">{l.quantity}</td>
+                <td className="px-4 py-2 text-right text-slate-700">£{l.requestedAmount.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>

@@ -1,6 +1,7 @@
 package com.dkds.cip.claims.claim.event;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public record ClaimAdjudicatedPayload(
         List<String> reasons,
         String adjudicatedBy,
         String origin,
-        UUID sourceSessionId
+        UUID sourceSessionId,
+        Instant updatedAt
 ) {
 }

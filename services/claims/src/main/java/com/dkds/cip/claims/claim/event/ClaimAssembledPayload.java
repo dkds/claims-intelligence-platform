@@ -1,6 +1,7 @@
 package com.dkds.cip.claims.claim.event;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ public record ClaimAssembledPayload(
         UUID sourceSessionId,
         UUID submittedBy,
         List<ClaimLinePayload> lines,
-        BigDecimal totalRequested
+        BigDecimal totalRequested,
+        Instant assembledAt
 ) {
 }

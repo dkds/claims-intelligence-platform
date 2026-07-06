@@ -1,6 +1,7 @@
 package com.dkds.cip.claims.claim.event;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 public record ClaimReadyForSubmissionPayload(
@@ -11,6 +12,7 @@ public record ClaimReadyForSubmissionPayload(
         String decision,
         BigDecimal approvedAmount,
         String origin,
-        UUID sourceSessionId
+        UUID sourceSessionId,
+        Instant updatedAt
 ) {
 }

@@ -47,6 +47,7 @@ export class ClaimProjector {
             status: 'ADJUDICATED',
             decision: p['decision'],
             approvedAmount: p['approvedAmount'],
+            reasons: p['reasons'] ?? [],
             adjudicatedBy: p['adjudicatedBy'],
             updatedAt: p['updatedAt'],
           },
