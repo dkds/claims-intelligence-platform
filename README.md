@@ -117,8 +117,8 @@ Tier 1 is built incrementally — something runnable at every step:
 | 2 | Sessions + Kafka: first event flow, session verification | Complete |
 | 3 | Claims: assembly, rules engine, state machine | Complete |
 | 4 | Fraud Detection (Go) + triage routing | Complete |
-| 5 | Projection + BFF: CQRS read model | Upcoming |
-| 6 | Clinic Workbench: end-to-end UI | — |
+| 5 | Projection + BFF: CQRS read model | Complete |
+| 6 | Clinic Workbench: end-to-end UI | In progress |
 | 7 | Hardening: outbox, schema registry, idempotency, auth | — |
 
 ---
