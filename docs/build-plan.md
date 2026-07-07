@@ -123,7 +123,8 @@ Use **Docker Compose** for development, not Kubernetes — Kubernetes (Kind/Mini
 - **Status:** In progress (6a–6c complete).
 
 ### Phase 7 — Harden (the deliberate upgrades)
-- **Build:** the transactional outbox + relay (polling first, optionally Debezium) replacing naive publish; Schema Registry + Avro replacing ad-hoc JSON; idempotent consumers (dedup by `eventId`) and dead-letter topics; real auth (reuse your Spring Authorization Server + PKCE) replacing the stub; basic observability (structured logs, tracing).
+- **Build:** the transactional outbox + relay (polling first, optionally Debezium) replacing naive publish; Schema Registry + Avro replacing ad-hoc JSON; idempotent consumers (dedup by `eventId`) and dead-letter topics; real auth (reuse your Spring Authorization Server + PKCE) replacing the stub; basic observability (structured logs, tracing); proper Kafka batch compression support across consumers, replacing the interim "producers publish uncompressed" fix — either swap Alpine-based JVM images for glibc-based ones (or add `gcompat`) so `snappy-java` can load its native lib, and add a codec package (e.g. `kafkajs-snappy`) to the Node consumers, or standardise on a codec everyone actually supports.
+- **Note:** discovered while verifying Phase 3's fraud-triage routing (2026-07-07) — the fraud-detection service's default Snappy compression crashed both the Claims (Alpine musl) and Projection (kafkajs, no codec installed) consumers. Worked around by disabling compression on the Go producer; revisit here.
 - **Runnable:** identical behaviour, now reliable — and each change is an ADR.
 - **Status:** Not started.
 

@@ -16,7 +16,11 @@ type Producer struct {
 }
 
 func NewProducer(brokers []string, topic string) (*Producer, error) {
-	cl, err := kgo.NewClient(kgo.SeedBrokers(brokers...))
+	// The JVM and Node consumers of this topic don't have a working Snappy
+	// codec available (musl/Alpine lacks the glibc snappy-java needs; kafkajs
+	// has no codec installed), so produce uncompressed rather than franz-go's
+	// default Snappy batching.
+	cl, err := kgo.NewClient(kgo.SeedBrokers(brokers...), kgo.ProducerBatchCompression(kgo.NoCompression()))
 	if err != nil {
 		return nil, fmt.Errorf("create producer: %w", err)
 	}
