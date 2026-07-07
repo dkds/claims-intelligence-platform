@@ -93,7 +93,7 @@ class ClaimControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void submitManualClaim_validData_returns201AndAdjudicates() {
+    void submitManualClaim_validData_returns201AndRoutesToReview() {
         var body = """
                 {
                   "petId": "%s",
@@ -113,44 +113,14 @@ class ClaimControllerTest extends AbstractIntegrationTest {
 
         assertThat(response.<String>path("id")).isNotNull();
         assertThat(response.<String>path("origin")).isEqualTo("MANUAL");
-        // standard policy = 80% coverage → partially approved at 80.00
-        assertThat(response.<String>path("status")).isEqualTo("READY_FOR_SUBMISSION");
-        assertThat(response.<String>path("adjudicationDecision")).isEqualTo("PARTIALLY_APPROVED");
-        assertThat(response.<Float>path("approvedAmount")).isEqualTo(80.00f);
+        // manual claims always require adjuster review, regardless of policy/coverage
+        assertThat(response.<String>path("status")).isEqualTo("PENDING_REVIEW");
+        assertThat(response.<String>path("adjudicationDecision")).isNull();
         assertThat(response.<Integer>path("lines.size()")).isEqualTo(1);
     }
 
     @Test
-    void submitManualClaim_premiumPolicy_fullyApproves() {
-        policyRepo.findById(policyId).ifPresent(p -> {
-            p.setCoverageType(CoverageType.PREMIUM);
-            policyRepo.save(p);
-        });
-
-        var body = """
-                {
-                  "petId": "%s",
-                  "policyId": "%s",
-                  "submittedBy": "%s",
-                  "lines": [{ "procedureCode": "CONSULT", "quantity": 1, "requestedAmount": 100.00 }]
-                }
-                """.formatted(petId, policyId, managerId);
-
-        var response = given()
-                .contentType(ContentType.JSON)
-                .body(body)
-                .post("/clinics/{clinicId}/claims", clinicId)
-                .then()
-                .statusCode(201)
-                .extract();
-
-        assertThat(response.<String>path("status")).isEqualTo("READY_FOR_SUBMISSION");
-        assertThat(response.<String>path("adjudicationDecision")).isEqualTo("APPROVED");
-        assertThat(response.<Float>path("approvedAmount")).isEqualTo(100.00f);
-    }
-
-    @Test
-    void submitManualClaim_uncoveredProcedure_claimRejected() {
+    void submitManualClaim_uncoveredProcedure_stillRoutesToReview() {
         var body = """
                 {
                   "petId": "%s",
@@ -168,7 +138,7 @@ class ClaimControllerTest extends AbstractIntegrationTest {
                 .statusCode(201)
                 .extract();
 
-        assertThat(response.<String>path("status")).isEqualTo("REJECTED");
+        assertThat(response.<String>path("status")).isEqualTo("PENDING_REVIEW");
         assertThat(response.<String>path("adjudicationDecision")).isNull();
     }
 
@@ -317,7 +287,7 @@ class ClaimControllerTest extends AbstractIntegrationTest {
         submitClaim();
 
         var response = given()
-                .queryParam("status", "READY_FOR_SUBMISSION")
+                .queryParam("status", "PENDING_REVIEW")
                 .get("/clinics/{clinicId}/claims", clinicId)
                 .then()
                 .statusCode(200)

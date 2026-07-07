@@ -46,3 +46,4 @@ cip:
       enrollment: cip.enrollment.v1
       sessions: cip.sessions.v1
       claims: cip.claims.v1
+      fraud: cip.fraud.v1

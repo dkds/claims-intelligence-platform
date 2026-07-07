@@ -5,6 +5,7 @@ import com.dkds.cip.claims.adjudication.RulesEngine;
 import com.dkds.cip.claims.claim.dto.ManualClaimLineRequest;
 import com.dkds.cip.claims.claim.dto.SubmitManualClaimRequest;
 import com.dkds.cip.claims.common.exception.ResourceNotFoundException;
+import com.dkds.cip.claims.fraud.FraudScoredPayload;
 import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItem;
 import com.dkds.cip.claims.masterdata.catalogue.LocalCatalogueItemRepository;
 import com.dkds.cip.claims.masterdata.clinic.LocalClinicRepository;
@@ -67,9 +68,6 @@ public class ClaimService {
             throw new IllegalStateException("Policy " + req.policyId() + " does not belong to pet " + req.petId());
         }
 
-        var procedureCodes = req.lines().stream().map(ManualClaimLineRequest::procedureCode).collect(Collectors.toSet());
-        var catalogueMap = buildCatalogueMap(procedureCodes);
-
         var claim = new Claim();
         claim.setClinicId(clinicId);
         claim.setPetId(req.petId());
@@ -96,7 +94,7 @@ public class ClaimService {
         var saved = claimRepository.save(claim);
         eventPublisher.publishAssembled(saved);
 
-        return adjudicate(saved, Optional.of(policy), catalogueMap);
+        return routeToReview(saved, List.of("Manual claims require adjuster review"));
     }
 
     @Transactional
@@ -151,7 +149,32 @@ public class ClaimService {
         var saved = claimRepository.save(claim);
         eventPublisher.publishAssembled(saved);
 
-        return adjudicate(saved, Optional.of(policy), catalogueMap);
+        return saved;
+    }
+
+    @Transactional
+    public void handleFraudScored(FraudScoredPayload payload) {
+        var claim = claimRepository.findById(payload.claimId()).orElse(null);
+        if (claim == null) {
+            log.warn("Skipping claim.fraud-scored {} — claim not found", payload.claimId());
+            return;
+        }
+        if (claim.getStatus() != ClaimStatus.ASSEMBLED || claim.getOrigin() != ClaimOrigin.SESSION) {
+            log.debug("Ignoring claim.fraud-scored for claim {} — status={} origin={}",
+                    claim.getId(), claim.getStatus(), claim.getOrigin());
+            return;
+        }
+
+        if ("low".equals(payload.riskLevel())) {
+            var policy = policyRepository.findById(claim.getPolicyId());
+            var procedureCodes = claim.getLines().stream()
+                    .map(ClaimLine::getProcedureCode)
+                    .collect(Collectors.toSet());
+            var catalogueMap = buildCatalogueMap(procedureCodes);
+            adjudicate(claim, policy, catalogueMap);
+        } else {
+            routeToReview(claim, List.of("Fraud risk level: " + payload.riskLevel()));
+        }
     }
 
     @Transactional(readOnly = true)
@@ -202,6 +225,16 @@ public class ClaimService {
             }
         }
         return claim;
+    }
+
+    private Claim routeToReview(Claim claim, List<String> reasons) {
+        addTransition(claim, ClaimStatus.ASSEMBLED, ClaimStatus.PENDING_REVIEW, "auto",
+                String.join("; ", reasons));
+        claim.setStatus(ClaimStatus.PENDING_REVIEW);
+        claim.setUpdatedAt(Instant.now());
+        var saved = claimRepository.save(claim);
+        eventPublisher.publishRoutedToReview(saved, reasons);
+        return saved;
     }
 
     private Map<String, LocalCatalogueItem> buildCatalogueMap(java.util.Set<String> codes) {

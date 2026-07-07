@@ -123,6 +123,18 @@ For a manual claim, `origin` is `"manual"` and `sourceSessionId` is absent.
 }
 ```
 
+**`claim.routed-to-review`** (Claims → consumed by Projection)
+```json
+{
+  "claimId": "claim-77421",
+  "reasons": ["Fraud risk level: high"],
+  "routedBy": "auto",
+  "origin": "session",
+  "updatedAt": "2026-05-22T09:10:31Z"
+}
+```
+Manual claims are always routed to review (`reasons: ["Manual claims require adjuster review"]`), regardless of fraud score.
+
 **`claim.adjudicated`** (Claims → consumed by Projection, Submission module, Payment via saga)
 ```json
 {

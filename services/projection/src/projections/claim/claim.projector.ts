@@ -54,6 +54,18 @@ export class ClaimProjector {
         },
         { upsert: true },
       );
+    } else if (eventType === 'claim.routed-to-review') {
+      await this.model.findOneAndUpdate(
+        filter,
+        {
+          $set: {
+            status: 'PENDING_REVIEW',
+            reasons: p['reasons'] ?? [],
+            updatedAt: p['updatedAt'],
+          },
+        },
+        { upsert: true },
+      );
     } else if (eventType === 'claim.rejected') {
       await this.model.findOneAndUpdate(
         filter,

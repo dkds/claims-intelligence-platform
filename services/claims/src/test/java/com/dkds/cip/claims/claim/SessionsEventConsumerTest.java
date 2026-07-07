@@ -53,7 +53,7 @@ class SessionsEventConsumerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void sessionVerified_knownPetStandardPolicy_assemblesAndAdjudicatesClaim() {
+    void sessionVerified_knownPetStandardPolicy_assemblesClaimAwaitingTriage() {
         clinicId = UUID.randomUUID();
         petId = UUID.randomUUID();
         seedMasterData(CoverageType.STANDARD);
@@ -65,15 +65,14 @@ class SessionsEventConsumerTest extends AbstractIntegrationTest {
 
         var claim = claims.get(0);
         assertThat(claim.getOrigin()).isEqualTo(ClaimOrigin.SESSION);
-        assertThat(claim.getStatus()).isEqualTo(ClaimStatus.READY_FOR_SUBMISSION);
-        assertThat(claim.getAdjudicationDecision().name()).isEqualTo("PARTIALLY_APPROVED");
-        // STANDARD = 80%; catalogue rate 100.00, qty 1 → approved = 80.00
-        assertThat(claim.getApprovedAmount()).isEqualByComparingTo("80.00");
+        assertThat(claim.getStatus()).isEqualTo(ClaimStatus.ASSEMBLED);
+        assertThat(claim.getAdjudicationDecision()).isNull();
+        assertThat(claim.getApprovedAmount()).isNull();
         assertThat(claim.getSourceSessionId()).isNotNull();
     }
 
     @Test
-    void sessionVerified_premiumPolicy_fullyApprovesClaim() {
+    void sessionVerified_premiumPolicy_assemblesClaimAwaitingTriage() {
         clinicId = UUID.randomUUID();
         petId = UUID.randomUUID();
         seedMasterData(CoverageType.PREMIUM);
@@ -81,9 +80,9 @@ class SessionsEventConsumerTest extends AbstractIntegrationTest {
         consumer.consume(sessionVerifiedEvent(clinicId, petId, "CONSULT", 1));
 
         var claim = claimRepo.findAll().get(0);
-        assertThat(claim.getStatus()).isEqualTo(ClaimStatus.READY_FOR_SUBMISSION);
-        assertThat(claim.getAdjudicationDecision().name()).isEqualTo("APPROVED");
-        assertThat(claim.getApprovedAmount()).isEqualByComparingTo("100.00");
+        assertThat(claim.getStatus()).isEqualTo(ClaimStatus.ASSEMBLED);
+        assertThat(claim.getAdjudicationDecision()).isNull();
+        assertThat(claim.getApprovedAmount()).isNull();
     }
 
     @Test

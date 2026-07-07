@@ -68,6 +68,17 @@ public class ClaimEventPublisher {
         publish("claim.rejected", claim.getId(), claim.getClinicId(), payload);
     }
 
+    public void publishRoutedToReview(Claim claim, List<String> reasons) {
+        var payload = new ClaimRoutedToReviewPayload(
+                claim.getId(),
+                reasons,
+                "auto",
+                claim.getOrigin().name().toLowerCase(),
+                claim.getUpdatedAt()
+        );
+        publish("claim.routed-to-review", claim.getId(), claim.getClinicId(), payload);
+    }
+
     public void publishReadyForSubmission(Claim claim) {
         var decision = claim.getAdjudicationDecision().name().toLowerCase().replace("_", "-");
         var payload = new ClaimReadyForSubmissionPayload(
