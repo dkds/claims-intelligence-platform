@@ -42,14 +42,14 @@ public class ClaimEventPublisher {
         publish("claim.assembled", claim.getId(), claim.getClinicId(), payload);
     }
 
-    public void publishAdjudicated(Claim claim, List<String> reasons) {
+    public void publishAdjudicated(Claim claim, List<String> reasons, String actor) {
         var decision = claim.getAdjudicationDecision().name().toLowerCase().replace("_", "-");
         var payload = new ClaimAdjudicatedPayload(
                 claim.getId(),
                 decision,
                 claim.getApprovedAmount(),
                 reasons,
-                "auto",
+                actor,
                 claim.getOrigin().name().toLowerCase(),
                 claim.getSourceSessionId(),
                 claim.getUpdatedAt()
@@ -57,11 +57,11 @@ public class ClaimEventPublisher {
         publish("claim.adjudicated", claim.getId(), claim.getClinicId(), payload);
     }
 
-    public void publishRejected(Claim claim, java.util.List<String> reasons) {
+    public void publishRejected(Claim claim, java.util.List<String> reasons, String actor) {
         var payload = new ClaimRejectedPayload(
                 claim.getId(),
                 reasons,
-                "auto",
+                actor,
                 claim.getOrigin().name().toLowerCase(),
                 claim.getUpdatedAt()
         );

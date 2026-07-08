@@ -204,15 +204,7 @@ public class ClaimService {
                 claim.setAdjudicationDecision(decision);
                 claim.setApprovedAmount(result.totalApproved());
                 claim.setUpdatedAt(Instant.now());
-                var saved = claimRepository.save(claim);
-                eventPublisher.publishAdjudicated(saved, result.reasons());
-
-                addTransition(saved, ClaimStatus.ADJUDICATED, ClaimStatus.READY_FOR_SUBMISSION, "auto", null);
-                saved.setStatus(ClaimStatus.READY_FOR_SUBMISSION);
-                saved.setUpdatedAt(Instant.now());
-                var ready = claimRepository.save(saved);
-                eventPublisher.publishReadyForSubmission(ready);
-                return ready;
+                return finalizeAdjudication(claim, result.reasons(), "auto");
             }
             case REJECTED -> {
                 addTransition(claim, ClaimStatus.ASSEMBLED, ClaimStatus.REJECTED, "auto",
@@ -220,11 +212,56 @@ public class ClaimService {
                 claim.setStatus(ClaimStatus.REJECTED);
                 claim.setUpdatedAt(Instant.now());
                 var saved = claimRepository.save(claim);
-                eventPublisher.publishRejected(saved, result.reasons());
+                eventPublisher.publishRejected(saved, result.reasons(), "auto");
                 return saved;
             }
         }
         return claim;
+    }
+
+    @Transactional
+    public Claim approveReview(UUID claimId, UUID approvedBy) {
+        var claim = requirePendingReview(claimId);
+        var reason = "Approved by adjuster";
+        addTransition(claim, ClaimStatus.PENDING_REVIEW, ClaimStatus.ADJUDICATED, approvedBy.toString(), reason);
+        claim.setStatus(ClaimStatus.ADJUDICATED);
+        claim.setAdjudicationDecision(AdjudicationDecision.APPROVED);
+        claim.setApprovedAmount(claim.getTotalRequested());
+        claim.setUpdatedAt(Instant.now());
+        return finalizeAdjudication(claim, List.of(reason), approvedBy.toString());
+    }
+
+    @Transactional
+    public Claim rejectReview(UUID claimId, UUID rejectedBy, String reason) {
+        var claim = requirePendingReview(claimId);
+        var effectiveReason = (reason == null || reason.isBlank()) ? "Rejected by adjuster" : reason;
+        addTransition(claim, ClaimStatus.PENDING_REVIEW, ClaimStatus.REJECTED, rejectedBy.toString(), effectiveReason);
+        claim.setStatus(ClaimStatus.REJECTED);
+        claim.setUpdatedAt(Instant.now());
+        var saved = claimRepository.save(claim);
+        eventPublisher.publishRejected(saved, List.of(effectiveReason), rejectedBy.toString());
+        return saved;
+    }
+
+    private Claim requirePendingReview(UUID claimId) {
+        var claim = claimRepository.findById(claimId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim not found: " + claimId));
+        if (claim.getStatus() != ClaimStatus.PENDING_REVIEW) {
+            throw new IllegalStateException("Claim " + claimId + " is not PENDING_REVIEW");
+        }
+        return claim;
+    }
+
+    private Claim finalizeAdjudication(Claim claim, List<String> reasons, String actor) {
+        var saved = claimRepository.save(claim);
+        eventPublisher.publishAdjudicated(saved, reasons, actor);
+
+        addTransition(saved, ClaimStatus.ADJUDICATED, ClaimStatus.READY_FOR_SUBMISSION, "auto", null);
+        saved.setStatus(ClaimStatus.READY_FOR_SUBMISSION);
+        saved.setUpdatedAt(Instant.now());
+        var ready = claimRepository.save(saved);
+        eventPublisher.publishReadyForSubmission(ready);
+        return ready;
     }
 
     private Claim routeToReview(Claim claim, List<String> reasons) {

@@ -1,16 +1,32 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useClaim } from '../hooks/useClaims'
+import { useAuth } from '../auth/useAuth'
+import { useClaim, useApproveClaim, useRejectClaim } from '../hooks/useClaims'
 import { StatusBadge } from '../components/StatusBadge'
 import { Spinner } from '../components/Spinner'
 import { ErrorMessage } from '../components/ErrorMessage'
 
 export function ClaimDetail() {
   const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const { data: claim, isPending, error } = useClaim(id!)
+  const [showRejectReason, setShowRejectReason] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+
+  const approve = useApproveClaim(id!, claim?.clinicId ?? '')
+  const reject = useRejectClaim(id!, claim?.clinicId ?? '')
 
   if (isPending) return <Spinner />
   if (error || !claim) return <ErrorMessage message="Claim not found." />
+
+  function handleApprove() {
+    approve.mutate(user!.id)
+  }
+
+  function handleReject() {
+    reject.mutate({ rejectedBy: user!.id, reason: rejectReason || undefined })
+  }
 
   return (
     <div className="max-w-2xl">
@@ -121,6 +137,61 @@ export function ClaimDetail() {
           </tbody>
         </table>
       </div>
+
+      {user?.role === 'adjuster' && claim.status === 'PENDING_REVIEW' && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="mb-3 text-sm text-amber-700">
+            This claim is awaiting your decision. Review the details above before approving or
+            rejecting.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleApprove}
+              disabled={approve.isPending || reject.isPending}
+              className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              {approve.isPending ? 'Approving…' : 'Approve'}
+            </button>
+            {!showRejectReason ? (
+              <button
+                onClick={() => setShowRejectReason(true)}
+                disabled={approve.isPending || reject.isPending}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                Reject
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowRejectReason(false)}
+                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+          {showRejectReason && (
+            <div className="mt-3">
+              <textarea
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Reason for rejection (optional)"
+                rows={3}
+                className="w-full rounded-md border border-slate-300 p-2 text-sm"
+              />
+              <button
+                onClick={handleReject}
+                disabled={reject.isPending}
+                className="mt-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {reject.isPending ? 'Rejecting…' : 'Confirm reject'}
+              </button>
+            </div>
+          )}
+          {(approve.isError || reject.isError) && (
+            <p className="mt-2 text-xs text-red-600">Action failed. Please try again.</p>
+          )}
+        </div>
+      )}
 
       {(claim.decision || claim.reasons) && (
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

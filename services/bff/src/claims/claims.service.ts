@@ -53,4 +53,26 @@ export class ClaimsService {
       throw toHttpException(err as AxiosError);
     }
   }
+
+  async approve(id: string, body: unknown): Promise<unknown> {
+    try {
+      const res = await firstValueFrom(
+        this.http.post(`${this.claimsUrl}/claims/${id}/approve`, body),
+      );
+      return res.data;
+    } catch (err) {
+      throw toHttpException(err as AxiosError);
+    }
+  }
+
+  async reject(id: string, body: unknown): Promise<unknown> {
+    try {
+      const res = await firstValueFrom(
+        this.http.post(`${this.claimsUrl}/claims/${id}/reject`, body),
+      );
+      return res.data;
+    } catch (err) {
+      throw toHttpException(err as AxiosError);
+    }
+  }
 }

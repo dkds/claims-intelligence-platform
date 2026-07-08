@@ -1,6 +1,8 @@
 package com.dkds.cip.claims.claim;
 
+import com.dkds.cip.claims.claim.dto.ApproveClaimRequest;
 import com.dkds.cip.claims.claim.dto.ClaimResponse;
+import com.dkds.cip.claims.claim.dto.RejectClaimRequest;
 import com.dkds.cip.claims.claim.dto.SubmitManualClaimRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +36,15 @@ public class ClaimController {
                                             @RequestParam(required = false) ClaimStatus status) {
         return service.listByClinic(clinicId, Optional.ofNullable(status))
                 .stream().map(ClaimResponse::from).toList();
+    }
+
+    @PostMapping("/claims/{claimId}/approve")
+    public ClaimResponse approve(@PathVariable UUID claimId, @Valid @RequestBody ApproveClaimRequest req) {
+        return ClaimResponse.from(service.approveReview(claimId, req.approvedBy()));
+    }
+
+    @PostMapping("/claims/{claimId}/reject")
+    public ClaimResponse reject(@PathVariable UUID claimId, @Valid @RequestBody RejectClaimRequest req) {
+        return ClaimResponse.from(service.rejectReview(claimId, req.rejectedBy(), req.reason()));
     }
 }

@@ -22,4 +22,14 @@ export class ClaimsController {
   create(@Param('clinicId') clinicId: string, @Body() body: unknown) {
     return this.claimsService.createManual(clinicId, body);
   }
+
+  @Post('claims/:id/approve')
+  approve(@Param('id') id: string, @Body() body: unknown) {
+    return this.claimsService.approve(id, body);
+  }
+
+  @Post('claims/:id/reject')
+  reject(@Param('id') id: string, @Body() body: unknown) {
+    return this.claimsService.reject(id, body);
+  }
 }

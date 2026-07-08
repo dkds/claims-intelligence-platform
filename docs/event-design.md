@@ -147,6 +147,7 @@ Manual claims are always routed to review (`reasons: ["Manual claims require adj
   "sourceSessionId": "sess-9920"
 }
 ```
+`adjudicatedBy` (and `claim.rejected`'s `rejectedBy`) is `"auto"` for the rules-engine path, or the adjuster's user id when a `PENDING_REVIEW` claim is resolved manually via `POST /claims/{id}/approve|reject`.
 
 **`payment.completed`** (Payment → consumed by Projection, Notification)
 ```json

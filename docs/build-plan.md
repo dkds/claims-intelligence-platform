@@ -116,11 +116,11 @@ Use **Docker Compose** for development, not Kubernetes — Kubernetes (Kind/Mini
   - **6a** — Foundations: routing, dummy auth, API layer, layout. *Complete.*
   - **6b** — Session verification. *Complete.*
   - **6c** — Manual claim submission. *Complete.*
-  - **6d** — Review queue (adjuster-only `PENDING_REVIEW` view). *Not started — Claims doesn't yet emit or route to `PENDING_REVIEW`, so this needs backend groundwork first.*
+  - **6d** — Review queue (adjuster-only `PENDING_REVIEW` view), plus the adjuster approve/reject action to resolve a claim. *Complete.*
   - **6e** — Dashboard (stat cards linking to list views). *Not started.*
   - **6f** — Master data UI: clinic/vet registration forms, added mid-build since master data otherwise has no UI. *Not started.*
 - **Runnable:** the entire Tier 1 path demoable in a browser.
-- **Status:** In progress (6a–6c complete).
+- **Status:** In progress (6a–6d complete).
 
 ### Phase 7 — Harden (the deliberate upgrades)
 - **Build:** the transactional outbox + relay (polling first, optionally Debezium) replacing naive publish; Schema Registry + Avro replacing ad-hoc JSON; idempotent consumers (dedup by `eventId`) and dead-letter topics; real auth (reuse your Spring Authorization Server + PKCE) replacing the stub; basic observability (structured logs, tracing); proper Kafka batch compression support across consumers, replacing the interim "producers publish uncompressed" fix — either swap Alpine-based JVM images for glibc-based ones (or add `gcompat`) so `snappy-java` can load its native lib, and add a codec package (e.g. `kafkajs-snappy`) to the Node consumers, or standardise on a codec everyone actually supports.

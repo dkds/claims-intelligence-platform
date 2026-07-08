@@ -58,3 +58,9 @@ export const getClaim = (id: string) =>
 
 export const submitClaim = (clinicId: string, body: SubmitClaimBody) =>
   client.post(`/clinics/${clinicId}/claims`, body).then(r => r.data)
+
+export const approveClaim = (id: string, approvedBy: string) =>
+  client.post(`/claims/${id}/approve`, { approvedBy }).then(r => r.data)
+
+export const rejectClaim = (id: string, rejectedBy: string, reason?: string) =>
+  client.post(`/claims/${id}/reject`, { rejectedBy, reason }).then(r => r.data)

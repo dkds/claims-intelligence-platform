@@ -297,6 +297,89 @@ class ClaimControllerTest extends AbstractIntegrationTest {
         assertThat(response).hasSize(1);
     }
 
+    @Test
+    void approveClaim_pendingReview_returns200AndReadyForSubmission() {
+        var claimId = submitClaim();
+        var adjusterId = UUID.randomUUID();
+
+        var body = """
+                { "approvedBy": "%s" }
+                """.formatted(adjusterId);
+
+        var response = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .post("/claims/{claimId}/approve", claimId)
+                .then()
+                .statusCode(200)
+                .extract();
+
+        assertThat(response.<String>path("status")).isEqualTo("READY_FOR_SUBMISSION");
+        assertThat(response.<String>path("adjudicationDecision")).isEqualTo("APPROVED");
+        assertThat(response.<Number>path("approvedAmount").doubleValue()).isEqualTo(100.00);
+    }
+
+    @Test
+    void approveClaim_notPendingReview_returns409() {
+        var claimId = submitClaim();
+        var approveBody = """
+                { "approvedBy": "%s" }
+                """.formatted(UUID.randomUUID());
+
+        given().contentType(ContentType.JSON).body(approveBody)
+                .post("/claims/{claimId}/approve", claimId)
+                .then().statusCode(200);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(approveBody)
+                .post("/claims/{claimId}/approve", claimId)
+                .then()
+                .statusCode(409);
+    }
+
+    @Test
+    void rejectClaim_pendingReview_returns200AndRejected() {
+        var claimId = submitClaim();
+
+        var body = """
+                { "rejectedBy": "%s", "reason": "Duplicate submission" }
+                """.formatted(UUID.randomUUID());
+
+        var response = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .post("/claims/{claimId}/reject", claimId)
+                .then()
+                .statusCode(200)
+                .extract();
+
+        assertThat(response.<String>path("status")).isEqualTo("REJECTED");
+    }
+
+    @Test
+    void rejectClaim_notPendingReview_returns409() {
+        var claimId = submitClaim();
+        var adjusterId = UUID.randomUUID();
+
+        var approveBody = """
+                { "approvedBy": "%s" }
+                """.formatted(adjusterId);
+        given().contentType(ContentType.JSON).body(approveBody)
+                .post("/claims/{claimId}/approve", claimId)
+                .then().statusCode(200);
+
+        var rejectBody = """
+                { "rejectedBy": "%s" }
+                """.formatted(adjusterId);
+        given()
+                .contentType(ContentType.JSON)
+                .body(rejectBody)
+                .post("/claims/{claimId}/reject", claimId)
+                .then()
+                .statusCode(409);
+    }
+
     private String submitClaim() {
         var body = """
                 {
