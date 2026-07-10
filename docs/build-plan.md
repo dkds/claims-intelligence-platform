@@ -118,9 +118,10 @@ Use **Docker Compose** for development, not Kubernetes — Kubernetes (Kind/Mini
   - **6c** — Manual claim submission. *Complete.*
   - **6d** — Review queue (adjuster-only `PENDING_REVIEW` view), plus the adjuster approve/reject action to resolve a claim. *Complete.*
   - **6e** — Dashboard (stat cards linking to list views). *Complete.*
-  - **6f** — Master data UI: clinic/vet registration forms, added mid-build since master data otherwise has no UI. *Not started.*
+  - **6f** — Master data UI: clinic/vet registration forms, added mid-build since master data otherwise has no UI. *Complete.*
 - **Runnable:** the entire Tier 1 path demoable in a browser.
-- **Status:** In progress (6a–6e complete).
+- **Note:** verifying 6f (2026-07-10) surfaced a latent bug from Phase 5 — Projection's Kafka dispatcher checked `aggregateType` against capitalised values (`'Clinic'`/`'Pet'`/`'Vet'`) while every publisher actually sends lowercase (per `docs/event-design.md`), so every clinic/vet/pet event on `cip.enrollment.v1` was silently dropped since Projection was built. Sessions and Claims were unaffected (they don't branch on `aggregateType`), which is why it went unnoticed until master data got its first UI. Fixed in `kafka-consumer.service.ts`; historical events were replayed via a consumer-group offset reset to backfill Mongo and Sessions' local master-data replica.
+- **Status:** In progress (6a–6f complete).
 
 ### Phase 7 — Harden (the deliberate upgrades)
 - **Build:** the transactional outbox + relay (polling first, optionally Debezium) replacing naive publish; Schema Registry + Avro replacing ad-hoc JSON; idempotent consumers (dedup by `eventId`) and dead-letter topics; real auth (reuse your Spring Authorization Server + PKCE) replacing the stub; basic observability (structured logs, tracing); proper Kafka batch compression support across consumers, replacing the interim "producers publish uncompressed" fix — either swap Alpine-based JVM images for glibc-based ones (or add `gcompat`) so `snappy-java` can load its native lib, and add a codec package (e.g. `kafkajs-snappy`) to the Node consumers, or standardise on a codec everyone actually supports.

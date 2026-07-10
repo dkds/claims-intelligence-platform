@@ -39,20 +39,21 @@ services:
       MONGODB_URI: mongodb://mongo:27017/cip_projection
       CLAIMS_URL: http://claims:8083
       SESSIONS_URL: http://sessions:8082
+      ENROLLMENT_URL: http://enrollment:8081
     ports:
       - "3001:3001"
     depends_on:
       - projection
     networks: [cip_services]
 
-  # workbench:
-  #   build: ../web/clinic-workbench
-  #   image: cip-workbench:latest
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - bff
-  #   networks: [cip_services]
+  workbench:
+    build: ../web/clinic-workbench
+    image: cip-workbench:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - bff
+    networks: [cip_services]
 
 networks:
   cip_services:

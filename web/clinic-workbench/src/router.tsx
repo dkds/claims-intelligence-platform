@@ -9,6 +9,10 @@ import { ClaimsList } from './pages/ClaimsList'
 import { ClaimDetail } from './pages/ClaimDetail'
 import { NewClaim } from './pages/NewClaim'
 import { ReviewQueue } from './pages/ReviewQueue'
+import { ClinicsList } from './pages/ClinicsList'
+import { NewClinic } from './pages/NewClinic'
+import { VetsList } from './pages/VetsList'
+import { NewVet } from './pages/NewVet'
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +32,10 @@ export const router = createBrowserRouter([
               { path: '/sessions', element: <SessionsList /> },
               { path: '/sessions/:id', element: <SessionDetail /> },
               { path: '/claims/new', element: <NewClaim /> },
+              { path: '/clinics', element: <ClinicsList /> },
+              { path: '/clinics/new', element: <NewClinic /> },
+              { path: '/vets', element: <VetsList /> },
+              { path: '/vets/new', element: <NewVet /> },
             ],
           },
           { path: '/claims', element: <ClaimsList /> },

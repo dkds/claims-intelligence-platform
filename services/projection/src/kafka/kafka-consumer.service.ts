@@ -77,11 +77,11 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
   private async dispatch(topic: Topic, envelope: EventEnvelope): Promise<void> {
     switch (topic) {
       case 'cip.enrollment.v1':
-        if (envelope.aggregateType === 'Clinic')
+        if (envelope.aggregateType === 'clinic')
           await this.clinicProjector.handle(envelope);
-        else if (envelope.aggregateType === 'Pet')
+        else if (envelope.aggregateType === 'pet')
           await this.petProjector.handle(envelope);
-        else if (envelope.aggregateType === 'Vet')
+        else if (envelope.aggregateType === 'vet')
           await this.vetProjector.handle(envelope);
         break;
       case 'cip.sessions.v1':

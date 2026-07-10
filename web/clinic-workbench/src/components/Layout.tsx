@@ -39,7 +39,11 @@ export function Layout() {
         <nav className="flex-1 space-y-1 px-2 py-2">
           <NavItem to="/" label="Dashboard" />
           {user?.role === 'clinic_manager' && (
-            <NavItem to="/sessions" label="Sessions" />
+            <>
+              <NavItem to="/sessions" label="Sessions" />
+              <NavItem to="/clinics" label="Clinics" />
+              <NavItem to="/vets" label="Vets" />
+            </>
           )}
           <NavItem to="/claims" label="Claims" />
           {user?.role === 'adjuster' && (

@@ -43,10 +43,7 @@ export class ClaimsService {
   async createManual(clinicId: string, body: unknown): Promise<unknown> {
     try {
       const res = await firstValueFrom(
-        this.http.post(
-          `${this.claimsUrl}/clinics/${clinicId}/claims`,
-          body,
-        ),
+        this.http.post(`${this.claimsUrl}/clinics/${clinicId}/claims`, body),
       );
       return res.data;
     } catch (err) {
