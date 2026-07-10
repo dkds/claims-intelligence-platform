@@ -3,6 +3,7 @@ import { useAuth } from '../auth/useAuth'
 import { useSessions } from '../hooks/useSessions'
 import { useClaims } from '../hooks/useClaims'
 import { Spinner } from '../components/Spinner'
+import { ErrorMessage } from '../components/ErrorMessage'
 
 function StatCard({
   label,
@@ -30,10 +31,15 @@ function StatCard({
 
 export function Dashboard() {
   const { user } = useAuth()
-  const { data: sessions, isPending: sessionsPending } = useSessions(user!.clinicId)
-  const { data: claims, isPending: claimsPending } = useClaims(user!.clinicId)
+  const {
+    data: sessions,
+    isPending: sessionsPending,
+    error: sessionsError,
+  } = useSessions(user!.clinicId)
+  const { data: claims, isPending: claimsPending, error: claimsError } = useClaims(user!.clinicId)
 
   if (sessionsPending || claimsPending) return <Spinner />
+  if (sessionsError || claimsError) return <ErrorMessage message="Failed to load dashboard." />
 
   const unverified = sessions?.filter(s => s.status === 'LOGGED').length ?? 0
   const pendingReview = claims?.filter(c => c.status === 'PENDING_REVIEW').length ?? 0
