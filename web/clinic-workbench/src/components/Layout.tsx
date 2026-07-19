@@ -1,9 +1,9 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
 
 const NAV_LINK_BASE =
-  'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors'
-const NAV_LINK_ACTIVE = 'bg-slate-700 text-white'
+  'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors';
+const NAV_LINK_ACTIVE = 'bg-slate-700 text-white';
 
 function NavItem({ to, label }: { to: string; label: string }) {
   return (
@@ -15,16 +15,16 @@ function NavItem({ to, label }: { to: string; label: string }) {
     >
       {label}
     </NavLink>
-  )
+  );
 }
 
 export function Layout() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   function handleLogout() {
-    logout()
-    navigate('/login')
+    logout();
+    navigate('/login');
   }
 
   return (
@@ -53,7 +53,9 @@ export function Layout() {
 
         <div className="border-t border-slate-700 px-4 py-4">
           <p className="text-sm font-medium text-slate-200">{user?.name}</p>
-          <p className="text-xs text-slate-400 capitalize">{user?.role.replace('_', ' ')}</p>
+          <p className="text-xs text-slate-400 capitalize">
+            {user?.role.replace('_', ' ')}
+          </p>
           <button
             onClick={handleLogout}
             className="mt-3 text-xs text-slate-400 hover:text-slate-200 transition-colors"
@@ -67,5 +69,5 @@ export function Layout() {
         <Outlet />
       </main>
     </div>
-  )
+  );
 }

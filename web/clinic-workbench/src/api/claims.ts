@@ -1,66 +1,70 @@
-import client from './client'
+import client from './client';
 
 export interface ClaimLine {
-  procedureCode: string
-  quantity: number
-  requestedAmount: number
+  procedureCode: string;
+  quantity: number;
+  requestedAmount: number;
 }
 
 export interface FraudResult {
-  score: number
-  riskLevel: string
-  flags: string[]
-  modelVersion: string
-  scoredAt: string
+  score: number;
+  riskLevel: string;
+  flags: string[];
+  modelVersion: string;
+  scoredAt: string;
 }
 
 export interface Claim {
-  _id: string
-  clinicId: string
-  petId: string
-  policyId: string
-  origin: string
-  sourceSessionId?: string
-  status: string
-  submittedBy: string
-  totalRequested: number
-  lines: ClaimLine[]
-  fraud?: FraudResult
-  decision?: string
-  approvedAmount?: number
-  reasons?: string[]
-  adjudicatedBy?: string
-  assembledAt: string
-  updatedAt: string
-  correlationId: string
+  _id: string;
+  clinicId: string;
+  petId: string;
+  policyId: string;
+  origin: string;
+  sourceSessionId?: string;
+  status: string;
+  submittedBy: string;
+  totalRequested: number;
+  lines: ClaimLine[];
+  fraud?: FraudResult;
+  decision?: string;
+  approvedAmount?: number;
+  reasons?: string[];
+  adjudicatedBy?: string;
+  assembledAt: string;
+  updatedAt: string;
+  correlationId: string;
 }
 
 export interface ManualClaimLine {
-  procedureCode: string
-  quantity: number
-  requestedAmount: number
+  procedureCode: string;
+  quantity: number;
+  requestedAmount: number;
 }
 
 export interface SubmitClaimBody {
-  petId: string
-  policyId: string
-  submittedBy: string
-  lines: ManualClaimLine[]
+  petId: string;
+  policyId: string;
+  submittedBy: string;
+  lines: ManualClaimLine[];
 }
 
 export const listClaims = (clinicId: string, status?: string) =>
   client
-    .get<Claim[]>(`/clinics/${clinicId}/claims`, { params: status ? { status } : undefined })
-    .then(r => r.data)
+    .get<Claim[]>(`/clinics/${clinicId}/claims`, {
+      params: status ? { status } : undefined,
+    })
+    .then((r) => r.data);
 
 export const getClaim = (id: string) =>
-  client.get<Claim>(`/claims/${id}`).then(r => r.data)
+  client.get<Claim>(`/claims/${id}`).then((r) => r.data);
 
 export const submitClaim = (clinicId: string, body: SubmitClaimBody) =>
-  client.post(`/clinics/${clinicId}/claims`, body).then(r => r.data)
+  client.post(`/clinics/${clinicId}/claims`, body).then((r) => r.data);
 
 export const approveClaim = (id: string, approvedBy: string) =>
-  client.post(`/claims/${id}/approve`, { approvedBy }).then(r => r.data)
+  client.post(`/claims/${id}/approve`, { approvedBy }).then((r) => r.data);
 
 export const rejectClaim = (id: string, rejectedBy: string, reason?: string) =>
-  client.post(`/claims/${id}/reject`, { rejectedBy, reason }).then(r => r.data)
+  client
+    .post(`/claims/${id}/reject`, { rejectedBy, reason })
+    .then((r) => r.data);

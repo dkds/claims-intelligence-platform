@@ -1,18 +1,18 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { Layout } from './components/Layout'
-import { ProtectedRoute } from './auth/ProtectedRoute'
-import { Login } from './pages/Login'
-import { Dashboard } from './pages/Dashboard'
-import { SessionsList } from './pages/SessionsList'
-import { SessionDetail } from './pages/SessionDetail'
-import { ClaimsList } from './pages/ClaimsList'
-import { ClaimDetail } from './pages/ClaimDetail'
-import { NewClaim } from './pages/NewClaim'
-import { ReviewQueue } from './pages/ReviewQueue'
-import { ClinicsList } from './pages/ClinicsList'
-import { NewClinic } from './pages/NewClinic'
-import { VetsList } from './pages/VetsList'
-import { NewVet } from './pages/NewVet'
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { Layout } from './components/Layout';
+import { ProtectedRoute } from './auth/ProtectedRoute';
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
+import { SessionsList } from './pages/SessionsList';
+import { SessionDetail } from './pages/SessionDetail';
+import { ClaimsList } from './pages/ClaimsList';
+import { ClaimDetail } from './pages/ClaimDetail';
+import { NewClaim } from './pages/NewClaim';
+import { ReviewQueue } from './pages/ReviewQueue';
+import { ClinicsList } from './pages/ClinicsList';
+import { NewClinic } from './pages/NewClinic';
+import { VetsList } from './pages/VetsList';
+import { NewVet } from './pages/NewVet';
 
 export const router = createBrowserRouter([
   {
@@ -49,4 +49,4 @@ export const router = createBrowserRouter([
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
-])
+]);

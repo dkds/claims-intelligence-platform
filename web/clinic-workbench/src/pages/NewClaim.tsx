@@ -1,57 +1,63 @@
-import { useState, type SubmitEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth'
-import { useSubmitClaim } from '../hooks/useClaims'
+import { useState, type SubmitEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+import { useSubmitClaim } from '../hooks/useClaims';
 
 interface Line {
-  procedureCode: string
-  quantity: string
-  requestedAmount: string
+  procedureCode: string;
+  quantity: string;
+  requestedAmount: string;
 }
 
-const emptyLine = (): Line => ({ procedureCode: '', quantity: '1', requestedAmount: '' })
+const emptyLine = (): Line => ({
+  procedureCode: '',
+  quantity: '1',
+  requestedAmount: '',
+});
 
 export function NewClaim() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const submit = useSubmitClaim(user!.clinicId)
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const submit = useSubmitClaim(user!.clinicId);
 
-  const [petId, setPetId] = useState('')
-  const [policyId, setPolicyId] = useState('')
-  const [lines, setLines] = useState<Line[]>([emptyLine()])
+  const [petId, setPetId] = useState('');
+  const [policyId, setPolicyId] = useState('');
+  const [lines, setLines] = useState<Line[]>([emptyLine()]);
 
   function updateLine(i: number, field: keyof Line, value: string) {
-    setLines(prev => prev.map((l, idx) => (idx === i ? { ...l, [field]: value } : l)))
+    setLines((prev) =>
+      prev.map((l, idx) => (idx === i ? { ...l, [field]: value } : l)),
+    );
   }
 
   function addLine() {
-    setLines(prev => [...prev, emptyLine()])
+    setLines((prev) => [...prev, emptyLine()]);
   }
 
   function removeLine(i: number) {
-    setLines(prev => prev.filter((_, idx) => idx !== i))
+    setLines((prev) => prev.filter((_, idx) => idx !== i));
   }
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault()
+    e.preventDefault();
     submit.mutate(
       {
         petId: petId.trim(),
         policyId: policyId.trim(),
         submittedBy: user!.id,
-        lines: lines.map(l => ({
+        lines: lines.map((l) => ({
           procedureCode: l.procedureCode.trim(),
           quantity: parseInt(l.quantity, 10),
           requestedAmount: parseFloat(l.requestedAmount),
         })),
       },
       { onSuccess: () => navigate('/claims') },
-    )
+    );
   }
 
   const inputCls =
-    'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500'
-  const labelCls = 'mb-1 block text-sm font-medium text-slate-700'
+    'w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500';
+  const labelCls = 'mb-1 block text-sm font-medium text-slate-700';
 
   return (
     <div className="max-w-2xl">
@@ -61,7 +67,9 @@ export function NewClaim() {
       >
         ← Back to claims
       </button>
-      <h1 className="mb-6 text-2xl font-semibold text-slate-800">Submit Manual Claim</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-slate-800">
+        Submit Manual Claim
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
@@ -70,7 +78,7 @@ export function NewClaim() {
             <input
               required
               value={petId}
-              onChange={e => setPetId(e.target.value)}
+              onChange={(e) => setPetId(e.target.value)}
               className={inputCls}
               placeholder="UUID"
             />
@@ -80,7 +88,7 @@ export function NewClaim() {
             <input
               required
               value={policyId}
-              onChange={e => setPolicyId(e.target.value)}
+              onChange={(e) => setPolicyId(e.target.value)}
               className={inputCls}
               placeholder="UUID"
             />
@@ -88,16 +96,22 @@ export function NewClaim() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Claim Lines</h2>
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">
+            Claim Lines
+          </h2>
           <div className="space-y-3">
             {lines.map((line, i) => (
               <div key={i} className="flex gap-3 items-end">
                 <div className="flex-1">
-                  {i === 0 && <label className={labelCls}>Procedure Code</label>}
+                  {i === 0 && (
+                    <label className={labelCls}>Procedure Code</label>
+                  )}
                   <input
                     required
                     value={line.procedureCode}
-                    onChange={e => updateLine(i, 'procedureCode', e.target.value)}
+                    onChange={(e) =>
+                      updateLine(i, 'procedureCode', e.target.value)
+                    }
                     className={inputCls}
                     placeholder="e.g. DENT-CLEAN"
                   />
@@ -109,7 +123,7 @@ export function NewClaim() {
                     type="number"
                     min={1}
                     value={line.quantity}
-                    onChange={e => updateLine(i, 'quantity', e.target.value)}
+                    onChange={(e) => updateLine(i, 'quantity', e.target.value)}
                     className={inputCls}
                   />
                 </div>
@@ -121,7 +135,9 @@ export function NewClaim() {
                     min={0.01}
                     step={0.01}
                     value={line.requestedAmount}
-                    onChange={e => updateLine(i, 'requestedAmount', e.target.value)}
+                    onChange={(e) =>
+                      updateLine(i, 'requestedAmount', e.target.value)
+                    }
                     className={inputCls}
                     placeholder="0.00"
                   />
@@ -149,7 +165,9 @@ export function NewClaim() {
         </div>
 
         {submit.isError && (
-          <p className="text-sm text-red-600">Submission failed. Check IDs and try again.</p>
+          <p className="text-sm text-red-600">
+            Submission failed. Check IDs and try again.
+          </p>
         )}
 
         <div className="flex gap-3">
@@ -170,5 +188,5 @@ export function NewClaim() {
         </div>
       </form>
     </div>
-  )
+  );
 }

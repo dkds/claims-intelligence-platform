@@ -1,14 +1,14 @@
-import { Link } from 'react-router-dom'
-import { useClinics } from '../hooks/useEnrollment'
-import { StatusBadge } from '../components/StatusBadge'
-import { Spinner } from '../components/Spinner'
-import { ErrorMessage } from '../components/ErrorMessage'
+import { Link } from 'react-router-dom';
+import { useClinics } from '../hooks/useEnrollment';
+import { StatusBadge } from '../components/StatusBadge';
+import { Spinner } from '../components/Spinner';
+import { ErrorMessage } from '../components/ErrorMessage';
 
 export function ClinicsList() {
-  const { data: clinics, isPending, error } = useClinics()
+  const { data: clinics, isPending, error } = useClinics();
 
-  if (isPending) return <Spinner />
-  if (error) return <ErrorMessage message="Failed to load clinics." />
+  if (isPending) return <Spinner />;
+  if (error) return <ErrorMessage message="Failed to load clinics." />;
 
   return (
     <div>
@@ -26,29 +26,44 @@ export function ClinicsList() {
         <table className="w-full text-sm">
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Name</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Contact Email</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Updated</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Name
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Contact Email
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Updated
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {(clinics ?? []).length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
+                <td
+                  colSpan={4}
+                  className="px-4 py-8 text-center text-slate-400"
+                >
                   No clinics found.
                 </td>
               </tr>
             )}
-            {(clinics ?? []).map(c => (
+            {(clinics ?? []).map((c) => (
               <tr key={c._id}>
                 <td className="px-4 py-3 text-slate-700">{c.name}</td>
-                <td className="px-4 py-3 text-slate-500">{c.contactEmail || '—'}</td>
+                <td className="px-4 py-3 text-slate-500">
+                  {c.contactEmail || '—'}
+                </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={c.status} />
                 </td>
                 <td className="px-4 py-3 text-slate-500">
-                  {c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : '—'}
+                  {c.updatedAt
+                    ? new Date(c.updatedAt).toLocaleDateString()
+                    : '—'}
                 </td>
               </tr>
             ))}
@@ -56,5 +71,5 @@ export function ClinicsList() {
         </table>
       </div>
     </div>
-  )
+  );
 }

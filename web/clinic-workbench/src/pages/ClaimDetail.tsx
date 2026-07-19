@@ -1,31 +1,31 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth'
-import { useClaim, useApproveClaim, useRejectClaim } from '../hooks/useClaims'
-import { StatusBadge } from '../components/StatusBadge'
-import { Spinner } from '../components/Spinner'
-import { ErrorMessage } from '../components/ErrorMessage'
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+import { useClaim, useApproveClaim, useRejectClaim } from '../hooks/useClaims';
+import { StatusBadge } from '../components/StatusBadge';
+import { Spinner } from '../components/Spinner';
+import { ErrorMessage } from '../components/ErrorMessage';
 
 export function ClaimDetail() {
-  const { id } = useParams<{ id: string }>()
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const { data: claim, isPending, error } = useClaim(id!)
-  const [showRejectReason, setShowRejectReason] = useState(false)
-  const [rejectReason, setRejectReason] = useState('')
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { data: claim, isPending, error } = useClaim(id!);
+  const [showRejectReason, setShowRejectReason] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
-  const approve = useApproveClaim(id!, claim?.clinicId ?? '')
-  const reject = useRejectClaim(id!, claim?.clinicId ?? '')
+  const approve = useApproveClaim(id!, claim?.clinicId ?? '');
+  const reject = useRejectClaim(id!, claim?.clinicId ?? '');
 
-  if (isPending) return <Spinner />
-  if (error || !claim) return <ErrorMessage message="Claim not found." />
+  if (isPending) return <Spinner />;
+  if (error || !claim) return <ErrorMessage message="Claim not found." />;
 
   function handleApprove() {
-    approve.mutate(user!.id)
+    approve.mutate(user!.id);
   }
 
   function handleReject() {
-    reject.mutate({ rejectedBy: user!.id, reason: rejectReason || undefined })
+    reject.mutate({ rejectedBy: user!.id, reason: rejectReason || undefined });
   }
 
   return (
@@ -49,15 +49,21 @@ export function ClaimDetail() {
         <dl className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <dt className="font-medium text-slate-500">Claim ID</dt>
-            <dd className="mt-1 font-mono text-xs text-slate-700">{claim._id}</dd>
+            <dd className="mt-1 font-mono text-xs text-slate-700">
+              {claim._id}
+            </dd>
           </div>
           <div>
             <dt className="font-medium text-slate-500">Pet</dt>
-            <dd className="mt-1 font-mono text-xs text-slate-700">{claim.petId}</dd>
+            <dd className="mt-1 font-mono text-xs text-slate-700">
+              {claim.petId}
+            </dd>
           </div>
           <div>
             <dt className="font-medium text-slate-500">Policy</dt>
-            <dd className="mt-1 font-mono text-xs text-slate-700">{claim.policyId}</dd>
+            <dd className="mt-1 font-mono text-xs text-slate-700">
+              {claim.policyId}
+            </dd>
           </div>
           <div>
             <dt className="font-medium text-slate-500">Submitted by</dt>
@@ -66,7 +72,9 @@ export function ClaimDetail() {
           {claim.sourceSessionId && (
             <div>
               <dt className="font-medium text-slate-500">Source session</dt>
-              <dd className="mt-1 font-mono text-xs text-slate-700">{claim.sourceSessionId}</dd>
+              <dd className="mt-1 font-mono text-xs text-slate-700">
+                {claim.sourceSessionId}
+              </dd>
             </div>
           )}
           <div>
@@ -77,18 +85,24 @@ export function ClaimDetail() {
           </div>
           <div>
             <dt className="font-medium text-slate-500">Assembled</dt>
-            <dd className="mt-1 text-slate-700">{new Date(claim.assembledAt).toLocaleString()}</dd>
+            <dd className="mt-1 text-slate-700">
+              {new Date(claim.assembledAt).toLocaleString()}
+            </dd>
           </div>
           <div>
             <dt className="font-medium text-slate-500">Last updated</dt>
-            <dd className="mt-1 text-slate-700">{new Date(claim.updatedAt).toLocaleString()}</dd>
+            <dd className="mt-1 text-slate-700">
+              {new Date(claim.updatedAt).toLocaleString()}
+            </dd>
           </div>
         </dl>
       </div>
 
       {claim.fraud && (
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Fraud Score</h2>
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">
+            Fraud Score
+          </h2>
           <div className="flex items-center gap-4">
             <div className="text-center">
               <p className="text-3xl font-bold text-slate-800">
@@ -97,11 +111,13 @@ export function ClaimDetail() {
               <p className="text-xs text-slate-500">risk score</p>
             </div>
             <StatusBadge status={claim.fraud.riskLevel} />
-            <p className="text-xs text-slate-400">model: {claim.fraud.modelVersion}</p>
+            <p className="text-xs text-slate-400">
+              model: {claim.fraud.modelVersion}
+            </p>
           </div>
           {claim.fraud.flags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1">
-              {claim.fraud.flags.map(f => (
+              {claim.fraud.flags.map((f) => (
                 <span
                   key={f}
                   className="rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600"
@@ -121,17 +137,27 @@ export function ClaimDetail() {
         <table className="w-full text-sm">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-4 py-2 text-left font-medium text-slate-500">Procedure</th>
-              <th className="px-4 py-2 text-right font-medium text-slate-500">Qty</th>
-              <th className="px-4 py-2 text-right font-medium text-slate-500">Amount</th>
+              <th className="px-4 py-2 text-left font-medium text-slate-500">
+                Procedure
+              </th>
+              <th className="px-4 py-2 text-right font-medium text-slate-500">
+                Qty
+              </th>
+              <th className="px-4 py-2 text-right font-medium text-slate-500">
+                Amount
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {claim.lines.map((l, i) => (
               <tr key={i}>
                 <td className="px-4 py-2 text-slate-700">{l.procedureCode}</td>
-                <td className="px-4 py-2 text-right text-slate-500">{l.quantity}</td>
-                <td className="px-4 py-2 text-right text-slate-700">£{l.requestedAmount.toFixed(2)}</td>
+                <td className="px-4 py-2 text-right text-slate-500">
+                  {l.quantity}
+                </td>
+                <td className="px-4 py-2 text-right text-slate-700">
+                  £{l.requestedAmount.toFixed(2)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -141,8 +167,8 @@ export function ClaimDetail() {
       {user?.role === 'adjuster' && claim.status === 'PENDING_REVIEW' && (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="mb-3 text-sm text-amber-700">
-            This claim is awaiting your decision. Review the details above before approving or
-            rejecting.
+            This claim is awaiting your decision. Review the details above
+            before approving or rejecting.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -173,7 +199,7 @@ export function ClaimDetail() {
             <div className="mt-3">
               <textarea
                 value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
+                onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="Reason for rejection (optional)"
                 rows={3}
                 className="w-full rounded-md border border-slate-300 p-2 text-sm"
@@ -188,19 +214,25 @@ export function ClaimDetail() {
             </div>
           )}
           {(approve.isError || reject.isError) && (
-            <p className="mt-2 text-xs text-red-600">Action failed. Please try again.</p>
+            <p className="mt-2 text-xs text-red-600">
+              Action failed. Please try again.
+            </p>
           )}
         </div>
       )}
 
       {(claim.decision || claim.reasons) && (
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-slate-700">Decision</h2>
+          <h2 className="mb-4 text-sm font-semibold text-slate-700">
+            Decision
+          </h2>
           <dl className="space-y-3 text-sm">
             {claim.decision && (
               <div>
                 <dt className="font-medium text-slate-500">Outcome</dt>
-                <dd className="mt-1 font-semibold text-slate-800 uppercase">{claim.decision}</dd>
+                <dd className="mt-1 font-semibold text-slate-800 uppercase">
+                  {claim.decision}
+                </dd>
               </div>
             )}
             {claim.approvedAmount !== undefined && (
@@ -222,7 +254,9 @@ export function ClaimDetail() {
                 <dt className="font-medium text-slate-500">Reasons</dt>
                 <dd className="mt-1">
                   <ul className="list-disc pl-4 text-slate-700">
-                    {claim.reasons.map((r, i) => <li key={i}>{r}</li>)}
+                    {claim.reasons.map((r, i) => (
+                      <li key={i}>{r}</li>
+                    ))}
                   </ul>
                 </dd>
               </div>
@@ -231,5 +265,5 @@ export function ClaimDetail() {
         </div>
       )}
     </div>
-  )
+  );
 }

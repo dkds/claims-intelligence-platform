@@ -1,12 +1,12 @@
-export type Role = 'clinic_manager' | 'adjuster'
+export type Role = 'clinic_manager' | 'adjuster';
 
 export interface DemoUser {
-  id: string
-  email: string
-  password: string
-  role: Role
-  name: string
-  clinicId: string
+  id: string;
+  email: string;
+  password: string;
+  role: Role;
+  name: string;
+  clinicId: string;
 }
 
 export const DEMO_USERS: DemoUser[] = [
@@ -26,4 +26,4 @@ export const DEMO_USERS: DemoUser[] = [
     name: 'Sam Adjuster',
     clinicId: '00000000-0000-0000-0000-0000000000c1',
   },
-]
+];

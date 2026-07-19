@@ -1,19 +1,23 @@
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth'
-import { useClaims } from '../hooks/useClaims'
-import { StatusBadge } from '../components/StatusBadge'
-import { Spinner } from '../components/Spinner'
-import { ErrorMessage } from '../components/ErrorMessage'
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+import { useClaims } from '../hooks/useClaims';
+import { StatusBadge } from '../components/StatusBadge';
+import { Spinner } from '../components/Spinner';
+import { ErrorMessage } from '../components/ErrorMessage';
 
 export function ReviewQueue() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const { data: claims, isPending, error } = useClaims(user!.clinicId, 'PENDING_REVIEW')
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const {
+    data: claims,
+    isPending,
+    error,
+  } = useClaims(user!.clinicId, 'PENDING_REVIEW');
 
-  if (isPending) return <Spinner />
-  if (error) return <ErrorMessage message="Failed to load review queue." />
+  if (isPending) return <Spinner />;
+  if (error) return <ErrorMessage message="Failed to load review queue." />;
 
-  const count = claims?.length ?? 0
+  const count = claims?.length ?? 0;
 
   return (
     <div>
@@ -31,16 +35,28 @@ export function ReviewQueue() {
           <table className="w-full text-sm">
             <thead className="border-b border-amber-100 bg-amber-50">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-amber-700">Claim ID</th>
-                <th className="px-4 py-3 text-left font-medium text-amber-700">Origin</th>
-                <th className="px-4 py-3 text-left font-medium text-amber-700">Pet</th>
-                <th className="px-4 py-3 text-left font-medium text-amber-700">Fraud Risk</th>
-                <th className="px-4 py-3 text-right font-medium text-amber-700">Total</th>
-                <th className="px-4 py-3 text-left font-medium text-amber-700">Assembled</th>
+                <th className="px-4 py-3 text-left font-medium text-amber-700">
+                  Claim ID
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-amber-700">
+                  Origin
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-amber-700">
+                  Pet
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-amber-700">
+                  Fraud Risk
+                </th>
+                <th className="px-4 py-3 text-right font-medium text-amber-700">
+                  Total
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-amber-700">
+                  Assembled
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {claims!.map(c => (
+              {claims!.map((c) => (
                 <tr
                   key={c._id}
                   onClick={() => navigate(`/claims/${c._id}`)}
@@ -77,5 +93,5 @@ export function ReviewQueue() {
         </div>
       )}
     </div>
-  )
+  );
 }

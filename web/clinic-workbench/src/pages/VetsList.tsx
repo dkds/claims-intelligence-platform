@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth'
-import { useVets, useApproveVet, useRejectVet } from '../hooks/useEnrollment'
-import { StatusBadge } from '../components/StatusBadge'
-import { Spinner } from '../components/Spinner'
-import { ErrorMessage } from '../components/ErrorMessage'
-import type { Vet } from '../api/enrollment'
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+import { useVets, useApproveVet, useRejectVet } from '../hooks/useEnrollment';
+import { StatusBadge } from '../components/StatusBadge';
+import { Spinner } from '../components/Spinner';
+import { ErrorMessage } from '../components/ErrorMessage';
+import type { Vet } from '../api/enrollment';
 
 function VetRow({ vet, clinicId }: { vet: Vet; clinicId: string }) {
-  const [showRejectReason, setShowRejectReason] = useState(false)
-  const [reason, setReason] = useState('')
-  const approve = useApproveVet(vet._id, clinicId)
-  const reject = useRejectVet(vet._id, clinicId)
+  const [showRejectReason, setShowRejectReason] = useState(false);
+  const [reason, setReason] = useState('');
+  const approve = useApproveVet(vet._id, clinicId);
+  const reject = useRejectVet(vet._id, clinicId);
 
   return (
     <tr>
@@ -54,7 +54,7 @@ function VetRow({ vet, clinicId }: { vet: Vet; clinicId: string }) {
               <div className="mt-2 flex items-center gap-2">
                 <input
                   value={reason}
-                  onChange={e => setReason(e.target.value)}
+                  onChange={(e) => setReason(e.target.value)}
                   placeholder="Reason for rejection"
                   className="w-48 rounded-md border border-slate-300 px-2 py-1 text-xs"
                 />
@@ -68,21 +68,23 @@ function VetRow({ vet, clinicId }: { vet: Vet; clinicId: string }) {
               </div>
             )}
             {(approve.isError || reject.isError) && (
-              <p className="mt-1 text-xs text-red-600">Action failed. Please try again.</p>
+              <p className="mt-1 text-xs text-red-600">
+                Action failed. Please try again.
+              </p>
             )}
           </div>
         )}
       </td>
     </tr>
-  )
+  );
 }
 
 export function VetsList() {
-  const { user } = useAuth()
-  const { data: vets, isPending, error } = useVets(user!.clinicId)
+  const { user } = useAuth();
+  const { data: vets, isPending, error } = useVets(user!.clinicId);
 
-  if (isPending) return <Spinner />
-  if (error) return <ErrorMessage message="Failed to load vets." />
+  if (isPending) return <Spinner />;
+  if (error) return <ErrorMessage message="Failed to load vets." />;
 
   return (
     <div>
@@ -100,26 +102,37 @@ export function VetsList() {
         <table className="w-full text-sm">
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Name</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Rejection Reason</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Actions</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Name
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Rejection Reason
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {(vets ?? []).length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
+                <td
+                  colSpan={4}
+                  className="px-4 py-8 text-center text-slate-400"
+                >
                   No vets found.
                 </td>
               </tr>
             )}
-            {(vets ?? []).map(v => (
+            {(vets ?? []).map((v) => (
               <VetRow key={v._id} vet={v} clinicId={user!.clinicId} />
             ))}
           </tbody>
         </table>
       </div>
     </div>
-  )
+  );
 }

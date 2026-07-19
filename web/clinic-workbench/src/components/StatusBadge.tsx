@@ -18,13 +18,15 @@ const COLOURS: Record<string, string> = {
   low: 'bg-green-100 text-green-700',
   medium: 'bg-amber-100 text-amber-700',
   high: 'bg-red-100 text-red-700',
-}
+};
 
 export function StatusBadge({ status }: { status: string }) {
-  const colour = COLOURS[status] ?? 'bg-gray-100 text-gray-600'
+  const colour = COLOURS[status] ?? 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colour}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colour}`}
+    >
       {status.replace(/_/g, ' ')}
     </span>
-  )
+  );
 }

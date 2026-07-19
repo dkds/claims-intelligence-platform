@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth'
-import { useClaims } from '../hooks/useClaims'
-import { StatusBadge } from '../components/StatusBadge'
-import { Spinner } from '../components/Spinner'
-import { ErrorMessage } from '../components/ErrorMessage'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+import { useClaims } from '../hooks/useClaims';
+import { StatusBadge } from '../components/StatusBadge';
+import { Spinner } from '../components/Spinner';
+import { ErrorMessage } from '../components/ErrorMessage';
 
 const STATUSES = [
   { key: undefined, label: 'All' },
@@ -13,16 +13,16 @@ const STATUSES = [
   { key: 'ADJUDICATED', label: 'Adjudicated' },
   { key: 'REJECTED', label: 'Rejected' },
   { key: 'READY_FOR_SUBMISSION', label: 'Ready' },
-] as const
+] as const;
 
 export function ClaimsList() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [status, setStatus] = useState<string | undefined>(undefined)
-  const { data: claims, isPending, error } = useClaims(user!.clinicId, status)
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<string | undefined>(undefined);
+  const { data: claims, isPending, error } = useClaims(user!.clinicId, status);
 
-  if (isPending) return <Spinner />
-  if (error) return <ErrorMessage message="Failed to load claims." />
+  if (isPending) return <Spinner />;
+  if (error) return <ErrorMessage message="Failed to load claims." />;
 
   return (
     <div>
@@ -39,7 +39,7 @@ export function ClaimsList() {
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {STATUSES.map(s => (
+        {STATUSES.map((s) => (
           <button
             key={s.label}
             onClick={() => setStatus(s.key)}
@@ -58,23 +58,38 @@ export function ClaimsList() {
         <table className="w-full text-sm">
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Claim ID</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Origin</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Pet</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
-              <th className="px-4 py-3 text-right font-medium text-slate-500">Total</th>
-              <th className="px-4 py-3 text-left font-medium text-slate-500">Assembled</th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Claim ID
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Origin
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Pet
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Status
+              </th>
+              <th className="px-4 py-3 text-right font-medium text-slate-500">
+                Total
+              </th>
+              <th className="px-4 py-3 text-left font-medium text-slate-500">
+                Assembled
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {(claims ?? []).length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                <td
+                  colSpan={6}
+                  className="px-4 py-8 text-center text-slate-400"
+                >
                   No claims found.
                 </td>
               </tr>
             )}
-            {(claims ?? []).map(c => (
+            {(claims ?? []).map((c) => (
               <tr
                 key={c._id}
                 onClick={() => navigate(`/claims/${c._id}`)}
@@ -106,5 +121,5 @@ export function ClaimsList() {
         </table>
       </div>
     </div>
-  )
+  );
 }
