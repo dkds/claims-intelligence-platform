@@ -1,15 +1,17 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { SessionProjector } from './session.projector.js';
 import { Session } from './session.schema.js';
 import { EventEnvelope } from '../../common/event-envelope.interface.js';
+import { resolvedMock } from '../../common/testing/jest-mock.util.js';
 
 describe('SessionProjector', () => {
   let projector: SessionProjector;
   let findOneAndUpdate: jest.Mock;
 
   beforeEach(async () => {
-    findOneAndUpdate = jest.fn().mockResolvedValue(undefined);
+    findOneAndUpdate = resolvedMock(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

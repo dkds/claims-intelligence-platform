@@ -8,9 +8,7 @@ import { Vet } from './vet.schema.js';
 export class VetProjector {
   private readonly logger = new Logger(VetProjector.name);
 
-  constructor(
-    @InjectModel(Vet.name) private readonly model: Model<Vet>,
-  ) {}
+  constructor(@InjectModel(Vet.name) private readonly model: Model<Vet>) {}
 
   async handle(envelope: EventEnvelope): Promise<void> {
     const { eventType, aggregateId, payload } = envelope;

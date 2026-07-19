@@ -8,9 +8,7 @@ import { Pet } from './pet.schema.js';
 export class PetProjector {
   private readonly logger = new Logger(PetProjector.name);
 
-  constructor(
-    @InjectModel(Pet.name) private readonly model: Model<Pet>,
-  ) {}
+  constructor(@InjectModel(Pet.name) private readonly model: Model<Pet>) {}
 
   async handle(envelope: EventEnvelope): Promise<void> {
     const { eventType, aggregateId, payload } = envelope;

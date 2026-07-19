@@ -1,15 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { getModelToken } from '@nestjs/mongoose';
+import { Test, TestingModule } from '@nestjs/testing';
+import { EventEnvelope } from '../../common/event-envelope.interface.js';
+import { resolvedMock } from '../../common/testing/jest-mock.util.js';
 import { ClinicProjector } from './clinic.projector.js';
 import { Clinic } from './clinic.schema.js';
-import { EventEnvelope } from '../../common/event-envelope.interface.js';
 
 describe('ClinicProjector', () => {
   let projector: ClinicProjector;
   let findOneAndUpdate: jest.Mock;
 
   beforeEach(async () => {
-    findOneAndUpdate = jest.fn().mockResolvedValue(undefined);
+    findOneAndUpdate = resolvedMock(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

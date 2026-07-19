@@ -8,9 +8,7 @@ import { Claim } from './claim.schema.js';
 export class ClaimProjector {
   private readonly logger = new Logger(ClaimProjector.name);
 
-  constructor(
-    @InjectModel(Claim.name) private readonly model: Model<Claim>,
-  ) {}
+  constructor(@InjectModel(Claim.name) private readonly model: Model<Claim>) {}
 
   async handle(envelope: EventEnvelope): Promise<void> {
     const { eventType, aggregateId, payload } = envelope;

@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
@@ -7,6 +8,7 @@ import { AxiosError } from 'axios';
 import { of, throwError } from 'rxjs';
 import { SessionsService } from './sessions.service.js';
 import { BffSession } from '../common/schemas/session.schema.js';
+import { leanExec } from '../common/testing/mongo-query.mock.js';
 
 function axiosError(
   status: number,
@@ -24,7 +26,7 @@ function axiosError(
       headers: {},
       config: {} as never,
     },
-  } as AxiosError;
+  };
 }
 
 describe('SessionsService', () => {
@@ -34,22 +36,10 @@ describe('SessionsService', () => {
   let httpPost: jest.Mock;
 
   beforeEach(async () => {
-    find = jest
-      .fn()
-      .mockReturnValue({
-        lean: () => ({
-          exec: jest.fn().mockResolvedValue([{ _id: 'session-1' }]),
-        }),
-      });
+    find = jest.fn().mockReturnValue(leanExec([{ _id: 'session-1' }]));
     findById = jest
       .fn()
-      .mockReturnValue({
-        lean: () => ({
-          exec: jest
-            .fn()
-            .mockResolvedValue({ _id: 'session-1', status: 'LOGGED' }),
-        }),
-      });
+      .mockReturnValue(leanExec({ _id: 'session-1', status: 'LOGGED' }));
     httpPost = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -88,9 +78,7 @@ describe('SessionsService', () => {
     });
 
     it('throws a 404 NotFoundException when the session does not exist', async () => {
-      findById.mockReturnValue({
-        lean: () => ({ exec: jest.fn().mockResolvedValue(null) }),
-      });
+      findById.mockReturnValue(leanExec(null));
 
       await expect(service.findById('missing')).rejects.toBeInstanceOf(
         NotFoundException,

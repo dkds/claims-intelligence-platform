@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { KafkaConsumerService } from './kafka-consumer.service.js';
@@ -7,12 +8,13 @@ import { VetProjector } from '../projections/vet/vet.projector.js';
 import { SessionProjector } from '../projections/session/session.projector.js';
 import { ClaimProjector } from '../projections/claim/claim.projector.js';
 import { EventEnvelope } from '../common/event-envelope.interface.js';
+import { resolvedMock } from '../common/testing/jest-mock.util.js';
 
 const mockConsumer = {
-  connect: jest.fn().mockResolvedValue(undefined),
-  subscribe: jest.fn().mockResolvedValue(undefined),
-  run: jest.fn().mockResolvedValue(undefined),
-  disconnect: jest.fn().mockResolvedValue(undefined),
+  connect: resolvedMock(undefined),
+  subscribe: resolvedMock(undefined),
+  run: resolvedMock(undefined),
+  disconnect: resolvedMock(undefined),
 };
 
 jest.mock('kafkajs', () => ({
@@ -20,6 +22,29 @@ jest.mock('kafkajs', () => ({
     consumer: jest.fn().mockReturnValue(mockConsumer),
   })),
 }));
+
+type Dispatch = (topic: string, envelope: EventEnvelope) => Promise<void>;
+
+function dispatch(
+  service: KafkaConsumerService,
+  topic: string,
+  env: EventEnvelope,
+): Promise<void> {
+  return (service as unknown as { dispatch: Dispatch }).dispatch(topic, env);
+}
+
+interface EachMessagePayload {
+  topic: string;
+  message: { value: Buffer | null };
+}
+
+type EachMessageHandler = (payload: EachMessagePayload) => Promise<void>;
+
+function getEachMessageHandler(): EachMessageHandler {
+  return (
+    mockConsumer.run.mock.calls[0][0] as { eachMessage: EachMessageHandler }
+  ).eachMessage;
+}
 
 describe('KafkaConsumerService', () => {
   let service: KafkaConsumerService;
@@ -31,11 +56,11 @@ describe('KafkaConsumerService', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    clinicProjector = { handle: jest.fn().mockResolvedValue(undefined) };
-    petProjector = { handle: jest.fn().mockResolvedValue(undefined) };
-    vetProjector = { handle: jest.fn().mockResolvedValue(undefined) };
-    sessionProjector = { handle: jest.fn().mockResolvedValue(undefined) };
-    claimProjector = { handle: jest.fn().mockResolvedValue(undefined) };
+    clinicProjector = { handle: resolvedMock(undefined) };
+    petProjector = { handle: resolvedMock(undefined) };
+    vetProjector = { handle: resolvedMock(undefined) };
+    sessionProjector = { handle: resolvedMock(undefined) };
+    claimProjector = { handle: resolvedMock(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -73,10 +98,7 @@ describe('KafkaConsumerService', () => {
 
   describe('dispatch', () => {
     it('routes cip.enrollment.v1 clinic events to the clinic projector', async () => {
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.enrollment.v1',
-        envelope('clinic'),
-      );
+      await dispatch(service, 'cip.enrollment.v1', envelope('clinic'));
 
       expect(clinicProjector.handle).toHaveBeenCalled();
       expect(petProjector.handle).not.toHaveBeenCalled();
@@ -84,19 +106,13 @@ describe('KafkaConsumerService', () => {
     });
 
     it('routes cip.enrollment.v1 pet events to the pet projector', async () => {
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.enrollment.v1',
-        envelope('pet'),
-      );
+      await dispatch(service, 'cip.enrollment.v1', envelope('pet'));
 
       expect(petProjector.handle).toHaveBeenCalled();
     });
 
     it('routes cip.enrollment.v1 vet events to the vet projector', async () => {
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.enrollment.v1',
-        envelope('vet'),
-      );
+      await dispatch(service, 'cip.enrollment.v1', envelope('vet'));
 
       expect(vetProjector.handle).toHaveBeenCalled();
     });
@@ -104,10 +120,7 @@ describe('KafkaConsumerService', () => {
     it('routes to no projector for an unrecognised aggregateType on cip.enrollment.v1', async () => {
       // Regression guard for the earlier capitalisation bug (aggregateType 'Clinic' vs 'clinic')
       // that silently dropped every clinic/vet/pet event until Phase 6f surfaced it.
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.enrollment.v1',
-        envelope('Clinic'),
-      );
+      await dispatch(service, 'cip.enrollment.v1', envelope('Clinic'));
 
       expect(clinicProjector.handle).not.toHaveBeenCalled();
       expect(petProjector.handle).not.toHaveBeenCalled();
@@ -115,28 +128,19 @@ describe('KafkaConsumerService', () => {
     });
 
     it('routes cip.sessions.v1 to the session projector', async () => {
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.sessions.v1',
-        envelope('session'),
-      );
+      await dispatch(service, 'cip.sessions.v1', envelope('session'));
 
       expect(sessionProjector.handle).toHaveBeenCalled();
     });
 
     it('routes cip.claims.v1 to the claim projector', async () => {
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.claims.v1',
-        envelope('claim'),
-      );
+      await dispatch(service, 'cip.claims.v1', envelope('claim'));
 
       expect(claimProjector.handle).toHaveBeenCalled();
     });
 
     it('routes cip.fraud.v1 to the claim projector', async () => {
-      await (service as unknown as { dispatch: Function }).dispatch(
-        'cip.fraud.v1',
-        envelope('claim'),
-      );
+      await dispatch(service, 'cip.fraud.v1', envelope('claim'));
 
       expect(claimProjector.handle).toHaveBeenCalled();
     });
@@ -160,7 +164,7 @@ describe('KafkaConsumerService', () => {
 
     it('dispatches a well-formed message to the right projector', async () => {
       await service.onModuleInit();
-      const eachMessage = mockConsumer.run.mock.calls[0][0].eachMessage;
+      const eachMessage = getEachMessageHandler();
 
       await eachMessage({
         topic: 'cip.claims.v1',
@@ -172,7 +176,7 @@ describe('KafkaConsumerService', () => {
 
     it('catches malformed message JSON without throwing', async () => {
       await service.onModuleInit();
-      const eachMessage = mockConsumer.run.mock.calls[0][0].eachMessage;
+      const eachMessage = getEachMessageHandler();
 
       await expect(
         eachMessage({
@@ -185,7 +189,7 @@ describe('KafkaConsumerService', () => {
 
     it('ignores messages with no value', async () => {
       await service.onModuleInit();
-      const eachMessage = mockConsumer.run.mock.calls[0][0].eachMessage;
+      const eachMessage = getEachMessageHandler();
 
       await eachMessage({ topic: 'cip.claims.v1', message: { value: null } });
 

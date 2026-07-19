@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
@@ -6,6 +7,7 @@ import { AxiosError } from 'axios';
 import { of, throwError } from 'rxjs';
 import { VetsService } from './vets.service.js';
 import { BffVet } from '../common/schemas/vet.schema.js';
+import { leanExec } from '../common/testing/mongo-query.mock.js';
 
 function axiosError(
   status: number,
@@ -23,7 +25,7 @@ function axiosError(
       headers: {},
       config: {} as never,
     },
-  } as AxiosError;
+  };
 }
 
 describe('VetsService', () => {
@@ -32,11 +34,7 @@ describe('VetsService', () => {
   let httpPost: jest.Mock;
 
   beforeEach(async () => {
-    find = jest
-      .fn()
-      .mockReturnValue({
-        lean: () => ({ exec: jest.fn().mockResolvedValue([{ _id: 'vet-1' }]) }),
-      });
+    find = jest.fn().mockReturnValue(leanExec([{ _id: 'vet-1' }]));
     httpPost = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({

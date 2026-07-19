@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { AxiosError } from 'axios';
 import { toHttpException } from './http-exception.mapper.js';
 
@@ -14,7 +15,7 @@ function axiosError(
       status === undefined
         ? undefined
         : { status, data, statusText: '', headers: {}, config: {} as never },
-  } as AxiosError;
+  };
 }
 
 describe('toHttpException', () => {

@@ -24,7 +24,10 @@ describe('ClaimProjector', () => {
     projector = module.get(ClaimProjector);
   });
 
-  function envelope(eventType: string, payload: Record<string, unknown>): EventEnvelope {
+  function envelope(
+    eventType: string,
+    payload: Record<string, unknown>,
+  ): EventEnvelope {
     return {
       eventId: 'evt-1',
       eventType,
@@ -74,7 +77,13 @@ describe('ClaimProjector', () => {
 
     expect(findOneAndUpdate).toHaveBeenCalledWith(
       { _id: 'claim-77421' },
-      { $set: { status: 'PENDING_REVIEW', reasons: [], updatedAt: '2026-06-01T10:00:31Z' } },
+      {
+        $set: {
+          status: 'PENDING_REVIEW',
+          reasons: [],
+          updatedAt: '2026-06-01T10:00:31Z',
+        },
+      },
       { upsert: true },
     );
   });
